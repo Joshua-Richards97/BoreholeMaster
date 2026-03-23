@@ -1,0 +1,98 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e40af"/>
+      <stop offset="100%" stop-color="#1e3a8a"/>
+    </linearGradient>
+    <linearGradient id="drop" x1="10%" y1="0%" x2="30%" y2="100%">
+      <stop offset="0%" stop-color="#93c5fd"/>
+      <stop offset="55%" stop-color="#3b82f6"/>
+      <stop offset="100%" stop-color="#bfdbfe" stop-opacity="0.9"/>
+    </linearGradient>
+    <linearGradient id="casing" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#1e3a8a"/>
+      <stop offset="100%" stop-color="#1d4ed8"/>
+    </linearGradient>
+    <linearGradient id="water" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#bfdbfe" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#60a5fa"/>
+    </linearGradient>
+    <linearGradient id="ground" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#4ade80"/>
+      <stop offset="35%" stop-color="#16a34a"/>
+      <stop offset="100%" stop-color="#92400e"/>
+    </linearGradient>
+    <radialGradient id="shine" cx="32%" cy="28%" r="50%">
+      <stop offset="0%" stop-color="white" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="white" stop-opacity="0"/>
+    </radialGradient>
+    <clipPath id="dc">
+      <path d="M 512 182 C 447 260,334 364,334 488 C 334 618,413 704,512 704 C 611 704,690 618,690 488 C 690 364,577 260,512 182 Z"/>
+    </clipPath>
+  </defs>
+
+  <!-- App icon rounded square background -->
+  <rect width="1024" height="1024" rx="224" fill="url(#bg)"/>
+
+  <!-- Subtle dot grid -->
+  <circle cx="256" cy="256" r="3" fill="white" opacity="0.04"/>
+  <circle cx="512" cy="256" r="3" fill="white" opacity="0.04"/>
+  <circle cx="768" cy="256" r="3" fill="white" opacity="0.04"/>
+  <circle cx="256" cy="512" r="3" fill="white" opacity="0.04"/>
+  <circle cx="768" cy="512" r="3" fill="white" opacity="0.04"/>
+  <circle cx="256" cy="768" r="3" fill="white" opacity="0.04"/>
+  <circle cx="512" cy="768" r="3" fill="white" opacity="0.04"/>
+  <circle cx="768" cy="768" r="3" fill="white" opacity="0.04"/>
+
+  <!-- Drop shadow -->
+  <ellipse cx="512" cy="724" rx="130" ry="24" fill="#0f172a" opacity="0.25"/>
+
+  <!-- Main water drop -->
+  <path d="M 512 182 C 447 260,334 364,334 488 C 334 618,413 704,512 704 C 611 704,690 618,690 488 C 690 364,577 260,512 182 Z"
+        fill="url(#drop)" stroke="white" stroke-width="5" stroke-opacity="0.18"/>
+
+  <!-- Ground band clipped -->
+  <rect x="334" y="490" width="356" height="214" fill="url(#ground)" clip-path="url(#dc)" opacity="0.5"/>
+  <rect x="334" y="487" width="356" height="10" fill="#15803d" clip-path="url(#dc)"/>
+
+  <!-- Casing outer -->
+  <rect x="470" y="232" width="84" height="340" rx="6" fill="url(#casing)" clip-path="url(#dc)"/>
+  <!-- Casing bore -->
+  <rect x="482" y="244" width="60" height="316" rx="3" fill="#0f172a" clip-path="url(#dc)"/>
+  <!-- Water column -->
+  <rect x="482" y="364" width="60" height="196" rx="3" fill="url(#water)" clip-path="url(#dc)"/>
+  <!-- Water surface -->
+  <rect x="482" y="361" width="60" height="8" rx="2" fill="white" clip-path="url(#dc)" opacity="0.9"/>
+
+  <!-- Water shimmer lines -->
+  <line x1="490" y1="380" x2="516" y2="380" stroke="white" stroke-width="2.5" opacity="0.5" clip-path="url(#dc)"/>
+  <line x1="496" y1="398" x2="534" y2="398" stroke="white" stroke-width="2.5" opacity="0.35" clip-path="url(#dc)"/>
+
+  <!-- Tick marks on right side of casing -->
+  <line x1="542" y1="268" x2="562" y2="268" stroke="white" stroke-width="4" stroke-linecap="round" clip-path="url(#dc)" opacity="0.8"/>
+  <line x1="542" y1="300" x2="562" y2="300" stroke="white" stroke-width="4" stroke-linecap="round" clip-path="url(#dc)" opacity="0.8"/>
+  <line x1="542" y1="332" x2="562" y2="332" stroke="white" stroke-width="4" stroke-linecap="round" clip-path="url(#dc)" opacity="0.8"/>
+  <!-- Water level tick — brightest -->
+  <line x1="542" y1="361" x2="568" y2="361" stroke="white" stroke-width="7" stroke-linecap="round" clip-path="url(#dc)"/>
+  <line x1="542" y1="400" x2="562" y2="400" stroke="white" stroke-width="3" stroke-linecap="round" clip-path="url(#dc)" opacity="0.5"/>
+  <line x1="542" y1="432" x2="562" y2="432" stroke="white" stroke-width="3" stroke-linecap="round" clip-path="url(#dc)" opacity="0.5"/>
+
+  <!-- Soil texture dots -->
+  <circle cx="374" cy="530" r="7" fill="#92400e" opacity="0.5" clip-path="url(#dc)"/>
+  <circle cx="400" cy="564" r="5" fill="#78350f" opacity="0.4" clip-path="url(#dc)"/>
+  <circle cx="378" cy="596" r="6" fill="#78350f" opacity="0.35" clip-path="url(#dc)"/>
+  <circle cx="362" cy="630" r="5" fill="#78350f" opacity="0.3" clip-path="url(#dc)"/>
+  <circle cx="628" cy="524" r="7" fill="#92400e" opacity="0.5" clip-path="url(#dc)"/>
+  <circle cx="612" cy="560" r="5" fill="#78350f" opacity="0.4" clip-path="url(#dc)"/>
+  <circle cx="634" cy="594" r="6" fill="#78350f" opacity="0.35" clip-path="url(#dc)"/>
+  <circle cx="620" cy="628" r="5" fill="#78350f" opacity="0.3" clip-path="url(#dc)"/>
+
+  <!-- Casing cap -->
+  <rect x="468" y="225" width="88" height="16" rx="5" fill="white" clip-path="url(#dc)" opacity="0.25"/>
+
+  <!-- Shine overlay -->
+  <path d="M 512 182 C 447 260,334 364,334 488 C 334 618,413 704,512 704 C 611 704,690 618,690 488 C 690 364,577 260,512 182 Z"
+        fill="url(#shine)"/>
+  <path d="M 512 182 C 447 260,334 364,334 488 C 334 618,413 704,512 704 C 611 704,690 618,690 488 C 690 364,577 260,512 182 Z"
+        fill="none" stroke="white" stroke-width="4" opacity="0.15"/>
+</svg>

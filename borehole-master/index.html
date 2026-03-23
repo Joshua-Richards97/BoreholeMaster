@@ -1,0 +1,2788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Borehole Master</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="Professional field calculator for hydrogeologists to calculate borehole volumes and track water level recovery">
+    <meta name="theme-color" content="#1e3a8a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Borehole Calc">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <link rel="apple-touch-icon" sizes="512x512" href="icons/icon-512.png">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            min-height: 100vh;
+            padding: 20px;
+            padding-top: max(20px, env(safe-area-inset-top));
+            padding-bottom: max(20px, env(safe-area-inset-bottom));
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 1200px;
+            width: 100%;
+            padding: 30px;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .tab {
+            padding: 15px 24px;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            font-size: 16px;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-height: 50px;
+        }
+        
+        .tab.active {
+            color: #1e3a8a;
+            border-bottom-color: #1e3a8a;
+        }
+        
+        .tab:hover {
+            color: #1e3a8a;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        h1 {
+            color: #1e3a8a;
+            font-size: 24px;
+        }
+        
+        h2 {
+            color: #1e40af;
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .bh-id-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .bh-id-group label {
+            font-weight: 600;
+            color: #555;
+            font-size: 16px;
+        }
+        
+        .bh-id-group input {
+            padding: 14px 18px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 18px;
+            width: 220px;
+            transition: border-color 0.3s;
+        }
+        
+        .bh-id-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .save-btn {
+            padding: 14px 28px;
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            min-height: 50px;
+        }
+        
+        .save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(30, 58, 138, 0.4);
+        }
+        
+        .save-btn:active {
+            transform: translateY(0);
+        }
+        
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+        }
+        
+        .input-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        label {
+            font-weight: 600;
+            color: #555;
+            font-size: 16px;
+        }
+        
+        input[type="number"], textarea, select {
+            padding: 16px;
+            border: 3px solid #ddd;
+            border-radius: 8px;
+            font-size: 20px;
+            transition: border-color 0.3s, transform 0.2s;
+            min-height: 54px;
+        }
+        
+        input[type="number"]:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #1e3a8a;
+            transform: scale(1.02);
+        }
+        
+        .preset-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: nowrap;
+        }
+        
+        .preset-btn {
+            padding: 12px 14px;
+            background: #f0f0f0;
+            border: 3px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+            min-height: 50px;
+        }
+        
+        .preset-btn.diameter-btn {
+            padding: 10px 12px;
+            font-size: 14px;
+            flex: 1;
+        }
+        
+        .preset-btn:hover {
+            background: #e0e0e0;
+            border-color: #1e3a8a;
+        }
+        
+        .preset-btn.active {
+            background: #1e3a8a;
+            color: white;
+            border-color: #1e3a8a;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 8px;
+        }
+        
+        .checkbox-group input[type="checkbox"] {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            min-height: auto;
+        }
+        
+        .checkbox-group label {
+            margin: 0;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .result-box {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            color: white;
+            padding: 24px;
+            border-radius: 10px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        
+        .result-box:hover {
+            transform: translateY(-2px);
+        }
+        
+        .result-box h2 {
+            font-size: 20px;
+            margin-bottom: 12px;
+            color: white;
+        }
+        
+        .result-box .volume {
+            font-size: 36px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .result-box .subtext {
+            font-size: 16px;
+            opacity: 0.9;
+            margin-top: 8px;
+        }
+        
+        .diagram-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .canvas-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            border: 3px solid #e0e0e0;
+        }
+        
+        canvas {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        .field-notes {
+            width: 100%;
+        }
+        
+        .field-notes textarea {
+            width: 100%;
+            min-height: 120px;
+            resize: vertical;
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+        }
+        
+        .logs-table {
+            width: 100%;
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th, td {
+            padding: 14px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            font-size: 14px;
+        }
+        
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .delete-btn {
+            padding: 8px 14px;
+            background: #f5576c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            min-height: 36px;
+        }
+        
+        .delete-btn:hover {
+            background: #e04555;
+        }
+        
+        .no-logs {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-size: 16px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .recovery-setup {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .recovery-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .measurement-entry {
+            background: #e8f4f8;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 3px solid #1e3a8a;
+        }
+        
+        .measurement-input-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 15px;
+            align-items: end;
+        }
+        
+        .measurement-input-row.with-manual-time {
+            grid-template-columns: 1fr 1fr 1fr;
+        }
+        
+        .recovery-chart {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+            min-height: 400px;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .info-banner {
+            background: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #555;
+        }
+        
+        .flow-rate-display {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 15px;
+        }
+        
+        .flow-rate-display h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: white;
+        }
+        
+        .flow-rate-value {
+            font-size: 28px;
+            font-weight: bold;
+        }
+        
+        .timestamp-display {
+            font-size: 13px;
+            color: #666;
+            font-style: italic;
+            margin-top: 5px;
+        }
+        
+        .subtabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+            background: #f8f9fa;
+            padding: 5px;
+            border-radius: 8px;
+        }
+        
+        .subtab {
+            padding: 10px 20px;
+            background: transparent;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex: 1;
+        }
+        
+        .subtab.active {
+            background: white;
+            color: #1e3a8a;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-section {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .recovery-inputs {
+                grid-template-columns: 1fr;
+            }
+            
+            .measurement-input-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .preset-buttons {
+                flex-wrap: wrap;
+            }
+        }
+        
+        /* GW Levels Styles */
+        .gw-points-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+        
+        .gw-point-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 18px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+        
+        .gw-point-card:hover {
+            border-color: #1e3a8a;
+            box-shadow: 0 4px 16px rgba(30, 58, 138, 0.15);
+            transform: translateY(-2px);
+        }
+        
+        .gw-point-card .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e3a8a;
+            margin-bottom: 6px;
+        }
+        
+        .gw-point-card .card-meta {
+            font-size: 13px;
+            color: #777;
+            margin-bottom: 4px;
+        }
+        
+        .gw-point-card .card-latest {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+            font-size: 13px;
+            color: #444;
+        }
+        
+        .gw-point-card .card-latest strong {
+            color: #1e3a8a;
+        }
+        
+        .gw-point-card .card-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: #e3f2fd;
+            color: #1e3a8a;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 12px;
+        }
+        
+        .gw-point-card .card-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        
+        .gw-back-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: none;
+            border: none;
+            color: #1e3a8a;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 6px 0;
+            margin-bottom: 16px;
+        }
+        
+        .gw-back-btn:hover {
+            color: #1e40af;
+            text-decoration: underline;
+        }
+        
+        .gw-detail-header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 24px;
+        }
+        
+        .gw-detail-header h2 {
+            color: white;
+            font-size: 22px;
+            margin-bottom: 6px;
+        }
+        
+        .gw-detail-meta {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .gw-stat-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        
+        .gw-stat {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 14px;
+            text-align: center;
+        }
+        
+        .gw-stat .stat-label {
+            font-size: 12px;
+            color: #777;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+        
+        .gw-stat .stat-value {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1e3a8a;
+        }
+        
+        .gw-stat .stat-unit {
+            font-size: 12px;
+            color: #999;
+        }
+        
+        .gw-add-reading {
+            background: #e8f4f8;
+            border: 3px solid #1e3a8a;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .gw-reading-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 12px;
+            align-items: end;
+        }
+        
+        .gw-levels-chart {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .gw-diff-panel {
+            background: #fff8e1;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .gw-diff-panel h3 {
+            color: #e65100;
+            font-size: 17px;
+            margin-bottom: 14px;
+        }
+
+        .gw-diff-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+            align-items: end;
+        }
+
+        .diff-result {
+            background: linear-gradient(135deg, #ff6f00, #ffa000);
+            color: white;
+            border-radius: 8px;
+            padding: 14px;
+            text-align: center;
+            margin-top: 12px;
+        }
+
+        .diff-result .diff-value {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .diff-result .diff-label {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+        
+        .new-point-modal-bg {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 9000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .new-point-modal-bg.open {
+            display: flex;
+        }
+        
+        .new-point-modal {
+            background: white;
+            border-radius: 14px;
+            padding: 30px;
+            max-width: 560px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .new-point-modal h2 {
+            margin-bottom: 20px;
+            color: #1e3a8a;
+        }
+        
+        .modal-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+        
+        .modal-grid .full-width {
+            grid-column: 1 / -1;
+        }
+        
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .cancel-btn {
+            padding: 12px 24px;
+            background: #f0f0f0;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .trend-up { color: #d32f2f; }
+        .trend-down { color: #388e3c; }
+        .trend-flat { color: #777; }
+        
+        /* Splash Screen Styles */
+        #splash-screen {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: linear-gradient(160deg, #1e3a8a 0%, #1e40af 60%, #2563eb 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            transition: opacity 0.6s ease-out;
+        }
+        
+        #splash-screen.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .splash-logo {
+            width: 180px;
+            height: 180px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 28px;
+            filter: drop-shadow(0 8px 24px rgba(0,0,0,0.35));
+        }
+        
+        .splash-logo svg { width: 100%; height: 100%; }
+        
+        .splash-wordmark {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+        .splash-title-top {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: white;
+            line-height: 1;
+        }
+        .splash-title-bottom {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-size: 32px;
+            font-weight: 300;
+            letter-spacing: 10px;
+            color: #93c5fd;
+            line-height: 1;
+        }
+        .splash-divider {
+            width: 160px;
+            height: 1px;
+            background: rgba(255,255,255,0.25);
+            margin: 14px 0 10px;
+        }
+        .splash-subtitle {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-size: 11px;
+            font-weight: 400;
+            letter-spacing: 3px;
+            color: rgba(255,255,255,0.55);
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+    <!-- Splash Screen -->
+    <div id="splash-screen">
+        <div class="splash-logo">
+            <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="splashDropG" x1="10%" y1="0%" x2="30%" y2="100%">
+                        <stop offset="0%" stop-color="#93c5fd"/>
+                        <stop offset="55%" stop-color="#3b82f6"/>
+                        <stop offset="100%" stop-color="#bfdbfe" stop-opacity="0.9"/>
+                    </linearGradient>
+                    <linearGradient id="splashCasingG" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#1e3a8a"/>
+                        <stop offset="100%" stop-color="#1d4ed8"/>
+                    </linearGradient>
+                    <linearGradient id="splashWaterG" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stop-color="#bfdbfe" stop-opacity="0.95"/>
+                        <stop offset="100%" stop-color="#60a5fa"/>
+                    </linearGradient>
+                    <linearGradient id="splashGroundG" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stop-color="#4ade80"/>
+                        <stop offset="35%" stop-color="#16a34a"/>
+                        <stop offset="100%" stop-color="#92400e"/>
+                    </linearGradient>
+                    <radialGradient id="splashShineG" cx="32%" cy="28%" r="50%">
+                        <stop offset="0%" stop-color="white" stop-opacity="0.3"/>
+                        <stop offset="100%" stop-color="white" stop-opacity="0"/>
+                    </radialGradient>
+                    <clipPath id="splashClip">
+                        <path d="M 100 18 C 74 48,44 80,44 112 C 44 148,69 172,100 172 C 131 172,156 148,156 112 C 156 80,126 48,100 18 Z"/>
+                    </clipPath>
+                </defs>
+                <ellipse cx="100" cy="178" rx="36" ry="7" fill="#0f172a" opacity="0.2"/>
+                <path d="M 100 18 C 74 48,44 80,44 112 C 44 148,69 172,100 172 C 131 172,156 148,156 112 C 156 80,126 48,100 18 Z"
+                      fill="url(#splashDropG)" stroke="white" stroke-width="1.5" stroke-opacity="0.2"/>
+                <rect x="44" y="113" width="112" height="59" fill="url(#splashGroundG)" clip-path="url(#splashClip)" opacity="0.5"/>
+                <rect x="44" y="111" width="112" height="5" fill="#15803d" clip-path="url(#splashClip)"/>
+                <rect x="88" y="36" width="24" height="90" rx="2" fill="url(#splashCasingG)" clip-path="url(#splashClip)"/>
+                <rect x="92" y="40" width="16" height="82" rx="1" fill="#0f172a" clip-path="url(#splashClip)"/>
+                <rect x="92" y="74" width="16" height="48" rx="1" fill="url(#splashWaterG)" clip-path="url(#splashClip)"/>
+                <rect x="92" y="73" width="16" height="3" fill="white" clip-path="url(#splashClip)" opacity="0.9"/>
+                <line x1="108" y1="50" x2="114" y2="50" stroke="white" stroke-width="1.5" stroke-linecap="round" clip-path="url(#splashClip)" opacity="0.8"/>
+                <line x1="108" y1="58" x2="114" y2="58" stroke="white" stroke-width="1.5" stroke-linecap="round" clip-path="url(#splashClip)" opacity="0.8"/>
+                <line x1="108" y1="66" x2="114" y2="66" stroke="white" stroke-width="1.5" stroke-linecap="round" clip-path="url(#splashClip)" opacity="0.8"/>
+                <line x1="108" y1="73" x2="116" y2="73" stroke="white" stroke-width="2.5" stroke-linecap="round" clip-path="url(#splashClip)"/>
+                <line x1="108" y1="84" x2="114" y2="84" stroke="white" stroke-width="1" stroke-linecap="round" clip-path="url(#splashClip)" opacity="0.5"/>
+                <line x1="108" y1="92" x2="114" y2="92" stroke="white" stroke-width="1" stroke-linecap="round" clip-path="url(#splashClip)" opacity="0.5"/>
+                <rect x="87" y="33" width="26" height="5" rx="2" fill="white" clip-path="url(#splashClip)" opacity="0.25"/>
+                <path d="M 100 18 C 74 48,44 80,44 112 C 44 148,69 172,100 172 C 131 172,156 148,156 112 C 156 80,126 48,100 18 Z"
+                      fill="url(#splashShineG)"/>
+                <path d="M 100 18 C 74 48,44 80,44 112 C 44 148,69 172,100 172 C 131 172,156 148,156 112 C 156 80,126 48,100 18 Z"
+                      fill="none" stroke="white" stroke-width="1.5" opacity="0.15"/>
+            </svg>
+        </div>
+        <div class="splash-wordmark">
+            <div class="splash-title-top">BOREHOLE</div>
+            <div class="splash-title-bottom">MASTER</div>
+        </div>
+        <div class="splash-divider"></div>
+        <div class="splash-subtitle">Field Hydrogeological Calculator</div>
+    </div>
+    
+    <div class="container">
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('calculator')">Calculator</button>
+            <button class="tab" onclick="switchTab('gwlevels')">GW Levels</button>
+            <button class="tab" onclick="switchTab('recovery')">Recovery Tracking</button>
+            <button class="tab" onclick="switchTab('logs')">Saved Logs</button>
+        </div>
+        
+        <div id="calculator-tab" class="tab-content active">
+            <div class="header-section">
+                <h1>Borehole Volume Calculator</h1>
+                <div class="bh-id-group">
+                    <label for="bhId">BH ID:</label>
+                    <input type="text" id="bhId" placeholder="e.g., BH-001">
+                    <button class="save-btn" onclick="saveLog()">Save</button>
+                </div>
+            </div>
+            
+            <div class="main-grid">
+                <div class="input-section">
+                    <div class="input-group">
+                        <label for="diameter">Well Diameter <span id="diameterUnitLabel" style="color:#888; font-weight:400;">(mm)</span></label>
+                        <div class="preset-buttons">
+                            <button class="preset-btn diameter-btn" onclick="setDiameter(50.8, 'mm')">2"</button>
+                            <button class="preset-btn diameter-btn" onclick="setDiameter(101.6, 'mm')">4"</button>
+                            <button class="preset-btn diameter-btn" onclick="setDiameter(152.4, 'mm')">6"</button>
+                            <button class="preset-btn diameter-btn" onclick="setDiameter(null, 'manual')" style="font-size:13px;">Custom</button>
+                        </div>
+                        <input type="number" id="diameter" value="150" min="0.1" step="0.1" placeholder="Enter diameter">
+                        <div class="preset-buttons">
+                            <button class="preset-btn" id="unit-mm" onclick="setUnit('mm')" style="background: #1e3a8a; color: white; flex:1;">mm</button>
+                            <button class="preset-btn" id="unit-in" onclick="setUnit('in')" style="flex:1;">inches</button>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="wellDepth">Well Depth (m bTOC)</label>
+                        <input type="number" id="wellDepth" value="10" min="0" step="0.1">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="waterLevel">Water Level Depth (m bTOC)</label>
+                        <input type="number" id="waterLevel" value="3" min="0" step="0.1">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="standUp">Casing Stand-up (m)</label>
+                        <input type="number" id="standUp" value="0.5" min="0" step="0.1">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="flushCheckbox" onchange="toggleFlush()">
+                            <label for="flushCheckbox">Flush to ground</label>
+                        </div>
+                    </div>
+                    
+                    <div class="result-box">
+                        <h2>Water Volume</h2>
+                        <div class="volume" id="volumeDisplay">0.00 L</div>
+                        <div class="subtext" id="volumeM3">0.000 m³</div>
+                    </div>
+                    
+                    <div class="result-box" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                        <h2>Purge Volume (3×)</h2>
+                        <div class="volume" id="purgeDisplay">0.00 L</div>
+                        <div class="subtext" id="purgeM3">0.000 m³</div>
+                    </div>
+                </div>
+                
+                <div class="diagram-section">
+                    <div class="canvas-container">
+                        <canvas id="boreholeCanvas" width="400" height="600"></canvas>
+                    </div>
+                    
+                    <div class="field-notes">
+                        <div class="input-group">
+                            <label for="notes">Field Notes</label>
+                            <textarea id="notes" placeholder="Enter field observations, water quality, flow conditions, etc..."></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="recovery-tab" class="tab-content">
+            <div class="header-section">
+                <h1>Recovery/Drawdown Tracking</h1>
+                <div class="bh-id-group">
+                    <label for="recoveryBhId">BH ID:</label>
+                    <input type="text" id="recoveryBhId" placeholder="e.g., BH-001">
+                </div>
+            </div>
+            
+            <div class="info-banner">
+                <strong>Tip:</strong> Measurements are automatically timestamped when added. Connect to borehole data to calculate flow rates.
+            </div>
+            
+            <div class="recovery-setup">
+                <h2>Setup</h2>
+                <div class="input-group" style="margin-bottom: 15px;">
+                    <label for="linkBorehole">Link to Borehole (Optional)</label>
+                    <select id="linkBorehole" onchange="loadBoreholeData()">
+                        <option value="">-- Manual Entry --</option>
+                    </select>
+                </div>
+                <div class="recovery-inputs">
+                    <div class="input-group">
+                        <label for="staticWaterLevel">Static Water Level (m bTOC)</label>
+                        <input type="number" id="staticWaterLevel" value="3" min="0" step="0.01">
+                    </div>
+                    <div class="input-group">
+                        <label for="recoveryStandUp">Casing Stand-up (m)</label>
+                        <input type="number" id="recoveryStandUp" value="0.5" min="0" step="0.1">
+                    </div>
+                </div>
+                <div class="recovery-inputs">
+                    <div class="input-group">
+                        <label for="recoveryDiameter">Well Diameter (mm)</label>
+                        <input type="number" id="recoveryDiameter" value="150" min="1" step="1">
+                    </div>
+                    <div class="input-group">
+                        <label for="recoveryWellDepth">Well Depth (m bTOC)</label>
+                        <input type="number" id="recoveryWellDepth" value="10" min="0" step="0.1">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="measurement-entry">
+                <h2>Quick Add Measurement</h2>
+                <div class="checkbox-group" style="margin-bottom: 15px;">
+                    <input type="checkbox" id="manualTimeCheckbox" onchange="toggleManualTime()">
+                    <label for="manualTimeCheckbox">Enter time manually</label>
+                </div>
+                <div class="measurement-input-row">
+                    <div class="input-group" id="manualTimeInput" style="display: none;">
+                        <label for="manualTime">Time (minutes)</label>
+                        <input type="number" id="manualTime" min="0" step="0.1" placeholder="0.0">
+                    </div>
+                    <div class="input-group">
+                        <label for="measuredDepth">Water Level (m bTOC)</label>
+                        <input type="number" id="measuredDepth" min="0" step="0.01" placeholder="0.00">
+                    </div>
+                    <button class="save-btn" onclick="addRecoveryMeasurement()" style="height: 54px;">â±ï¸ Add Now</button>
+                </div>
+                <div class="timestamp-display" id="lastTimestamp"></div>
+            </div>
+            
+            <div id="flowRateDisplay" class="flow-rate-display" style="display: none;">
+                <h3>Average Flow Rate</h3>
+                <div class="flow-rate-value" id="flowRateValue">0.00 L/s</div>
+                <div class="subtext" id="flowRateAlt">0.00 L/min</div>
+            </div>
+            
+            <div class="btn-group" style="margin: 20px 0;">
+                <button class="save-btn" onclick="saveRecoveryTest()">Save Test</button>
+                <button class="save-btn" onclick="clearRecoveryMeasurements()" style="background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);">Clear</button>
+                <button class="save-btn" onclick="exportRecoveryCSV()" style="background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);">Export CSV</button>
+            </div>
+            
+            <div class="recovery-chart">
+                <canvas id="recoveryChart" width="800" height="400"></canvas>
+            </div>
+            
+            <div class="logs-table" style="margin-top: 20px;">
+                <h2>Measurements</h2>
+                <table id="recoveryMeasurementsTable">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Elapsed (min)</th>
+                            <th>Water Level (m bTOC)</th>
+                            <th>Change (m)</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recoveryMeasurementsBody">
+                        <tr><td colspan="5" class="no-logs">No measurements yet. Add your first measurement above.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div id="logs-tab" class="tab-content">
+            <div class="header-section">
+                <h1>Saved Logs</h1>
+            </div>
+            
+            <div class="subtabs">
+                <button class="subtab active" onclick="switchSubTab('calculator-logs')">Calculator Logs</button>
+                <button class="subtab" onclick="switchSubTab('recovery-logs')">Recovery Tests</button>
+            </div>
+            
+            <div id="calculator-logs" class="subtab-content active">
+                <div class="action-buttons" style="margin-bottom: 20px;">
+                    <button class="save-btn" onclick="exportLogsCSV()" style="background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);">Export CSV</button>
+                    <button class="save-btn" onclick="clearAllCalculatorLogs()" style="background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);">Clear All</button>
+                </div>
+                <div class="logs-table" id="logsTableContainer">
+                    <div class="no-logs">No saved calculator logs yet.</div>
+                </div>
+            </div>
+            
+            <div id="recovery-logs" class="subtab-content" style="display: none;">
+                <div class="action-buttons" style="margin-bottom: 20px;">
+                    <button class="save-btn" onclick="exportAllRecoveryTestsCSV()" style="background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);">Export All CSV</button>
+                    <button class="save-btn" onclick="clearAllRecoveryTests()" style="background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);">Clear All</button>
+                </div>
+                <div class="logs-table" id="recoveryLogsTableContainer">
+                    <div class="no-logs">No saved recovery tests yet.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- GW Levels Tab -->
+        <div id="gwlevels-tab" class="tab-content">
+            <!-- List view: monitoring points -->
+            <div id="gw-list-view">
+                <div class="header-section">
+                    <h1>💧 Groundwater Levels</h1>
+                    <button class="save-btn" onclick="openNewPointModal()">+ New Point</button>
+                </div>
+                <div class="info-banner">
+                    <strong>Tip:</strong> Create a monitoring point for each borehole/well. Then record groundwater levels over time and compare between points.
+                </div>
+                <div id="gwPointsGrid" class="gw-points-grid">
+                    <div class="no-logs" style="grid-column:1/-1">No monitoring points yet. Click <strong>+ New Point</strong> to get started.</div>
+                </div>
+            </div>
+            
+            <!-- Detail view: single point readings -->
+            <div id="gw-detail-view" style="display:none;">
+                <button class="gw-back-btn" onclick="showGWListView()">← Back to Points</button>
+                
+                <div class="gw-detail-header">
+                    <h2 id="gwDetailTitle">MW-001</h2>
+                    <div class="gw-detail-meta" id="gwDetailMeta"></div>
+                </div>
+                
+                <div class="gw-stat-bar" id="gwStatBar"></div>
+                
+                <!-- Add Reading -->
+                <div class="gw-add-reading">
+                    <h2 style="margin-bottom:14px; color:#1e3a8a; font-size:17px;">Record Reading</h2>
+                    <div class="gw-reading-row">
+                        <div class="input-group">
+                            <label for="gwReadingDepth">Depth to Water (m bTOC)</label>
+                            <input type="number" id="gwReadingDepth" step="0.001" placeholder="e.g., 4.250">
+                        </div>
+                        <div class="input-group">
+                            <label for="gwReadingDate">Date / Time</label>
+                            <input type="datetime-local" id="gwReadingDate" style="font-size:16px; padding:14px; border:3px solid #ddd; border-radius:8px; min-height:54px;">
+                        </div>
+                        <button class="save-btn" onclick="addGWReading()" style="white-space:nowrap;">Add Reading</button>
+                    </div>
+                    <div class="input-group" style="margin-top:10px;">
+                        <label for="gwReadingNotes">Reading Notes (optional)</label>
+                        <input type="text" id="gwReadingNotes" placeholder="Conditions, weather, dry/wet season..." style="font-size:15px; padding:12px; border:2px solid #ddd; border-radius:8px;">
+                    </div>
+                </div>
+
+                <!-- Differential Calculator -->
+                <div class="gw-diff-panel" id="gwDiffPanel" style="display:none;">
+                    <h3>📐 Differential Calculator</h3>
+                    <p style="font-size:13px; color:#666; margin-bottom:12px;">Compare water levels between two readings or between this point and another.</p>
+                    <div class="gw-diff-inputs">
+                        <div class="input-group">
+                            <label for="gwDiffDate1">Reading 1</label>
+                            <select id="gwDiffDate1" style="font-size:15px; padding:12px; border:2px solid #ddd; border-radius:8px; min-height:48px;"></select>
+                        </div>
+                        <div class="input-group">
+                            <label for="gwDiffDate2">Reading 2</label>
+                            <select id="gwDiffDate2" style="font-size:15px; padding:12px; border:2px solid #ddd; border-radius:8px; min-height:48px;"></select>
+                        </div>
+                        <button class="save-btn" onclick="calcDiff()" style="background: linear-gradient(135deg, #ff6f00, #ffa000);">Calculate</button>
+                    </div>
+                    <div id="gwDiffResult" style="display:none;" class="diff-result">
+                        <div class="diff-value" id="gwDiffValue">—</div>
+                        <div class="diff-label" id="gwDiffLabel">Difference (m)</div>
+                    </div>
+                </div>
+                
+                <!-- Chart -->
+                <div class="gw-levels-chart">
+                    <canvas id="gwLevelsChart" width="900" height="320"></canvas>
+                </div>
+                
+                <!-- Readings table -->
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:10px;">
+                    <h2 style="color:#1e40af;">Readings History</h2>
+                    <div class="btn-group">
+                        <button class="save-btn" onclick="exportGWReadingsCSV()" style="background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); font-size:14px; padding:10px 16px;">Export CSV</button>
+                        <button class="save-btn" onclick="deleteGWPoint()" style="background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%); font-size:14px; padding:10px 16px;">Delete Point</button>
+                    </div>
+                </div>
+                <div class="logs-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date / Time</th>
+                                <th>Depth to Water (m bTOC)</th>
+                                <th>RL Water (m AHD)</th>
+                                <th>Change from Previous (m)</th>
+                                <th>Notes</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="gwReadingsBody">
+                            <tr><td colspan="6" class="no-logs">No readings recorded yet.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+    
+    <!-- New GW Point Modal -->
+    <div class="new-point-modal-bg" id="newPointModalBg">
+        <div class="new-point-modal">
+            <h2>📍 New Monitoring Point</h2>
+            <div class="modal-grid">
+                <div class="input-group full-width">
+                    <label for="npPointId">Point ID *</label>
+                    <input type="text" id="npPointId" placeholder="e.g., MW-001" style="font-size:16px; padding:12px; border:2px solid #ddd; border-radius:8px;">
+                </div>
+                <div class="input-group full-width">
+                    <label for="npDescription">Description / Site Name</label>
+                    <input type="text" id="npDescription" placeholder="e.g., Site A – Upgradient" style="font-size:16px; padding:12px; border:2px solid #ddd; border-radius:8px;">
+                </div>
+                <div class="input-group">
+                    <label for="npEasting">Easting (m)</label>
+                    <input type="number" id="npEasting" placeholder="e.g., 315400" step="0.001" style="font-size:16px; padding:12px; border:2px solid #ddd; border-radius:8px;">
+                </div>
+                <div class="input-group">
+                    <label for="npNorthing">Northing (m)</label>
+                    <input type="number" id="npNorthing" placeholder="e.g., 5812300" step="0.001" style="font-size:16px; padding:12px; border:2px solid #ddd; border-radius:8px;">
+                </div>
+                <div class="input-group">
+                    <label for="npRLTOC">RL of TOC (m AHD)</label>
+                    <input type="number" id="npRLTOC" placeholder="e.g., 42.50" step="0.001" style="font-size:16px; padding:12px; border:2px solid #ddd; border-radius:8px;">
+                </div>
+                <div class="input-group">
+                    <label for="npDiameter">Casing Diameter (mm)</label>
+                    <input type="number" id="npDiameter" value="50" step="1" style="font-size:16px; padding:12px; border:2px solid #ddd; border-radius:8px;">
+                </div>
+                <div class="input-group">
+                    <label for="npDepth">Well Depth (m bTOC)</label>
+                    <input type="number" id="npDepth" placeholder="e.g., 15.0" step="0.01" style="font-size:16px; padding:12px; border:2px solid #ddd; border-radius:8px;">
+                </div>
+                <div class="input-group">
+                    <label for="npStandUp">Casing Stand-up (m)</label>
+                    <input type="number" id="npStandUp" value="0.5" step="0.01" style="font-size:16px; padding:12px; border:2px solid #ddd; border-radius:8px;">
+                </div>
+                <div class="input-group full-width">
+                    <label for="npNotes">Notes</label>
+                    <textarea id="npNotes" placeholder="Geology, screen interval, installation notes..." style="min-height:70px; font-size:14px; padding:10px; resize:vertical; border:2px solid #ddd; border-radius:8px;"></textarea>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="cancel-btn" onclick="closeNewPointModal()">Cancel</button>
+                <button class="save-btn" onclick="saveNewPoint()" style="font-size:15px; padding:12px 24px;">Create Point</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const canvas = document.getElementById('boreholeCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Get input elements
+        const diameterInput = document.getElementById('diameter');
+        const wellDepthInput = document.getElementById('wellDepth');
+        const waterLevelInput = document.getElementById('waterLevel');
+        const standUpInput = document.getElementById('standUp');
+        const flushCheckbox = document.getElementById('flushCheckbox');
+        const volumeDisplay = document.getElementById('volumeDisplay');
+        const volumeM3Display = document.getElementById('volumeM3');
+        const purgeDisplay = document.getElementById('purgeDisplay');
+        const purgeM3Display = document.getElementById('purgeM3');
+        const bhIdInput = document.getElementById('bhId');
+        const notesInput = document.getElementById('notes');
+        
+        let currentUnit = 'mm';
+        let savedLogs = JSON.parse(localStorage.getItem('boreholeLogs')) || [];
+        let recoveryMeasurements = [];
+        let savedRecoveryTests = JSON.parse(localStorage.getItem('recoveryTests')) || [];
+        let testStartTime = null;
+        
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            if (tabName === 'calculator') {
+                document.querySelectorAll('.tab')[0].classList.add('active');
+                document.getElementById('calculator-tab').classList.add('active');
+            } else if (tabName === 'gwlevels') {
+                document.querySelectorAll('.tab')[1].classList.add('active');
+                document.getElementById('gwlevels-tab').classList.add('active');
+                renderGWPoints();
+            } else if (tabName === 'recovery') {
+                document.querySelectorAll('.tab')[2].classList.add('active');
+                document.getElementById('recovery-tab').classList.add('active');
+                updateBoreholeDropdown();
+                drawRecoveryChart();
+            } else if (tabName === 'logs') {
+                document.querySelectorAll('.tab')[3].classList.add('active');
+                document.getElementById('logs-tab').classList.add('active');
+                displayLogs();
+                displayRecoveryLogs();
+            }
+        }
+        
+        function switchSubTab(tabName) {
+            document.querySelectorAll('.subtab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.subtab-content').forEach(content => {
+                content.style.display = 'none';
+                content.classList.remove('active');
+            });
+            
+            if (tabName === 'calculator-logs') {
+                document.querySelectorAll('.subtab')[0].classList.add('active');
+                document.getElementById('calculator-logs').style.display = 'block';
+                document.getElementById('calculator-logs').classList.add('active');
+            } else if (tabName === 'recovery-logs') {
+                document.querySelectorAll('.subtab')[1].classList.add('active');
+                document.getElementById('recovery-logs').style.display = 'block';
+                document.getElementById('recovery-logs').classList.add('active');
+            }
+        }
+        
+        // Expose all interactive functions to global scope
+        window.switchSubTab = switchSubTab;
+        window.switchTab = switchTab;
+        window.setUnit = setUnit;
+        window.setDiameter = setDiameter;
+        window.toggleFlush = toggleFlush;
+        window.saveLog = saveLog;
+        window.toggleManualTime = toggleManualTime;
+        window.loadBoreholeData = loadBoreholeData;
+        window.addRecoveryMeasurement = addRecoveryMeasurement;
+        window.deleteRecoveryMeasurement = deleteRecoveryMeasurement;
+        window.clearRecoveryMeasurements = clearRecoveryMeasurements;
+        window.saveRecoveryTest = saveRecoveryTest;
+        window.exportRecoveryCSV = exportRecoveryCSV;
+        window.exportLogsCSV = exportLogsCSV;
+        window.exportAllRecoveryTestsCSV = exportAllRecoveryTestsCSV;
+        
+        function setUnit(unit) {
+            const diameter = parseFloat(diameterInput.value) || 0;
+            
+            if (unit === 'in' && currentUnit === 'mm') {
+                diameterInput.value = diameter > 0 ? (diameter / 25.4).toFixed(3) : '';
+                currentUnit = 'in';
+                document.getElementById('unit-mm').style.background = '#f0f0f0';
+                document.getElementById('unit-mm').style.color = '#000';
+                document.getElementById('unit-in').style.background = '#1e3a8a';
+                document.getElementById('unit-in').style.color = 'white';
+                document.getElementById('diameterUnitLabel').textContent = '(inches)';
+            } else if (unit === 'mm' && currentUnit === 'in') {
+                diameterInput.value = diameter > 0 ? (diameter * 25.4).toFixed(1) : '';
+                currentUnit = 'mm';
+                document.getElementById('unit-mm').style.background = '#1e3a8a';
+                document.getElementById('unit-mm').style.color = 'white';
+                document.getElementById('unit-in').style.background = '#f0f0f0';
+                document.getElementById('unit-in').style.color = '#000';
+                document.getElementById('diameterUnitLabel').textContent = '(mm)';
+            }
+            calculateAndDraw();
+        }
+        
+        function setDiameter(value, unit) {
+            if (unit === 'manual') {
+                // Custom: just clear and focus the input for free entry
+                diameterInput.value = '';
+                diameterInput.focus();
+                return;
+            }
+            if (currentUnit === 'in' && unit === 'mm') {
+                diameterInput.value = (value / 25.4).toFixed(3);
+            } else if (currentUnit === 'mm' && unit === 'mm') {
+                diameterInput.value = value.toFixed(1);
+            }
+            calculateAndDraw();
+        }
+        
+        function toggleFlush() {
+            if (flushCheckbox.checked) {
+                standUpInput.value = 0;
+                standUpInput.disabled = true;
+            } else {
+                standUpInput.disabled = false;
+            }
+            calculateAndDraw();
+        }
+        
+        function calculateAndDraw() {
+            // Get values
+            let diameter = parseFloat(diameterInput.value) || 0;
+            
+            // Convert to mm if in inches
+            if (currentUnit === 'in') {
+                diameter = diameter * 25.4;
+            }
+            
+            const radius = diameter / 2 / 1000; // Convert mm to meters
+            const wellDepth = parseFloat(wellDepthInput.value) || 0;
+            const waterLevel = parseFloat(waterLevelInput.value) || 0;
+            const standUp = parseFloat(standUpInput.value) || 0;
+            
+            // Calculate water column height
+            const waterColumnHeight = Math.max(0, wellDepth - waterLevel);
+            
+            // Calculate volume (πr²h)
+            const volumeM3 = Math.PI * radius * radius * waterColumnHeight;
+            const volumeL = volumeM3 * 1000;
+            
+            // Calculate purge volume (3x)
+            const purgeVolumeL = volumeL * 3;
+            const purgeVolumeM3 = volumeM3 * 3;
+            
+            // Update display with animation
+            animateValue(volumeDisplay, volumeL, ' L');
+            animateValue(volumeM3Display, volumeM3, ' m³', 3);
+            animateValue(purgeDisplay, purgeVolumeL, ' L');
+            animateValue(purgeM3Display, purgeVolumeM3, ' m³', 3);
+            
+            // Draw diagram
+            drawBorehole(wellDepth, waterLevel, standUp, diameter);
+        }
+        
+        function animateValue(element, value, suffix, decimals = 2) {
+            const current = parseFloat(element.textContent) || 0;
+            const diff = value - current;
+            const steps = 10;
+            const increment = diff / steps;
+            let step = 0;
+            
+            const timer = setInterval(() => {
+                step++;
+                const newValue = current + (increment * step);
+                element.textContent = newValue.toFixed(decimals) + suffix;
+                
+                if (step >= steps) {
+                    clearInterval(timer);
+                    element.textContent = value.toFixed(decimals) + suffix;
+                }
+            }, 20);
+        }
+        
+        function drawBorehole(wellDepth, waterLevel, standUp, diameter) {
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Set up dimensions
+            const padding = 80;
+            const maxHeight = canvas.height - 2 * padding;
+            const centerX = canvas.width / 2;
+            const wellWidth = 80;
+            
+            // Calculate total height for scaling
+            const totalHeight = wellDepth + standUp;
+            const scale = totalHeight > 0 ? maxHeight / totalHeight : 1;
+            
+            // Calculate positions (from top)
+            const groundY = padding + standUp * scale;
+            const waterY = groundY + waterLevel * scale;
+            const bottomY = groundY + wellDepth * scale;
+            const topY = padding;
+            
+            // Draw ground level
+            ctx.fillStyle = '#8B4513';
+            ctx.fillRect(0, groundY - 10, canvas.width, 20);
+            ctx.fillStyle = '#228B22';
+            ctx.fillRect(0, groundY - 10, canvas.width, 10);
+            
+            // Draw casing stand-up (above ground)
+            if (standUp > 0) {
+                ctx.strokeStyle = '#666';
+                ctx.lineWidth = 4;
+                ctx.strokeRect(centerX - wellWidth/2, topY, wellWidth, standUp * scale);
+                ctx.fillStyle = 'rgba(200, 200, 200, 0.3)';
+                ctx.fillRect(centerX - wellWidth/2, topY, wellWidth, standUp * scale);
+            }
+            
+            // Draw borehole casing (below ground)
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 4;
+            ctx.strokeRect(centerX - wellWidth/2, groundY, wellWidth, wellDepth * scale);
+            
+            // Draw soil around borehole
+            ctx.fillStyle = 'rgba(139, 69, 19, 0.3)';
+            ctx.fillRect(0, groundY, centerX - wellWidth/2, wellDepth * scale);
+            ctx.fillRect(centerX + wellWidth/2, groundY, canvas.width - (centerX + wellWidth/2), wellDepth * scale);
+            
+            // Draw water
+            if (waterLevel < wellDepth) {
+                const waterHeight = (wellDepth - waterLevel) * scale;
+                const gradient = ctx.createLinearGradient(0, waterY, 0, bottomY);
+                gradient.addColorStop(0, 'rgba(100, 180, 255, 0.7)');
+                gradient.addColorStop(1, 'rgba(30, 130, 200, 0.9)');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(centerX - wellWidth/2 + 2, waterY, wellWidth - 4, waterHeight);
+                
+                // Draw thick blue line at water surface
+                ctx.strokeStyle = '#0044aa';
+                ctx.lineWidth = 5;
+                ctx.beginPath();
+                ctx.moveTo(centerX - wellWidth/2 + 2, waterY);
+                ctx.lineTo(centerX + wellWidth/2 - 2, waterY);
+                ctx.stroke();
+            }
+            
+            // Draw dimension lines and labels
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 1;
+            ctx.fillStyle = '#000';
+            ctx.font = '12px Arial';
+            
+            const rightLabelX = centerX + wellWidth/2 + 70;
+            const rightLineStartX = centerX + wellWidth/2 + 10;
+            const rightLineEndX = centerX + wellWidth/2 + 25;
+            
+            const leftLabelX = 15;
+            const leftLineStartX = centerX - wellWidth/2 - 10;
+            const leftLineEndX = centerX - wellWidth/2 - 30;
+            
+            // Well depth dimension (left side)
+            ctx.fillStyle = '#000';
+            const depthBgl = wellDepth - standUp;
+            drawDimension(leftLineStartX, groundY, leftLineEndX, bottomY, 
+                         leftLabelX, (groundY + bottomY) / 2, `${depthBgl.toFixed(2)} m bgl`);
+            
+            // Water column dimension (right side) - with measurement at water level
+            if (waterLevel < wellDepth) {
+                ctx.fillStyle = '#0066cc';
+                drawDimension(rightLineStartX, waterY, rightLineEndX, bottomY, 
+                             rightLabelX, (waterY + bottomY) / 2, `${(wellDepth - waterLevel).toFixed(2)} m`, '#0066cc');
+            }
+            
+            // Labels
+            ctx.font = 'bold 14px Arial';
+            ctx.textAlign = 'left';
+            
+            // Ground level label (left side, moved further up)
+            ctx.fillStyle = '#000';
+            ctx.fillText('GROUND', 10, groundY - 35);
+            ctx.fillText('LEVEL', 10, groundY - 20);
+            
+            // Water level label at the line with both measurements
+            if (waterLevel < wellDepth) {
+                ctx.fillStyle = '#0044aa';
+                ctx.font = 'bold 12px Arial';
+                ctx.textAlign = 'left';
+                ctx.fillText(`${waterLevel.toFixed(2)} m bTOC`, rightLabelX, waterY);
+            }
+            
+            // Bottom label
+            ctx.font = 'bold 14px Arial';
+            ctx.fillStyle = '#000';
+            ctx.textAlign = 'center';
+            ctx.fillText('BOTTOM', centerX, bottomY + 20);
+        }
+        
+        function drawDimension(x1, y1, x2, y2, labelX, labelY, text, color = '#000') {
+            ctx.strokeStyle = color;
+            ctx.fillStyle = color;
+            ctx.lineWidth = 1;
+            
+            // Draw lines
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y1);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(x2, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(x2, y2);
+            ctx.lineTo(x1, y2);
+            ctx.stroke();
+            
+            // Draw arrows
+            drawArrow(x2, y1, 0, 5);
+            drawArrow(x2, y2, 0, -5);
+            
+            // Draw label
+            ctx.textAlign = 'left';
+            ctx.fillText(text, labelX, labelY);
+        }
+        
+        function drawArrow(x, y, dx, dy) {
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(x - 3, y + dy);
+            ctx.lineTo(x + 3, y + dy);
+            ctx.closePath();
+            ctx.fill();
+        }
+        
+        function saveLog() {
+            const bhId = bhIdInput.value.trim();
+            
+            if (!bhId) {
+                // Visual feedback - highlight the BH ID field
+                bhIdInput.style.borderColor = '#f5576c';
+                bhIdInput.style.boxShadow = '0 0 0 3px rgba(245, 87, 108, 0.3)';
+                bhIdInput.focus();
+                
+                alert('âš ï¸ Please enter a Borehole ID before saving.');
+                
+                // Reset styling after 3 seconds
+                setTimeout(() => {
+                    bhIdInput.style.borderColor = '';
+                    bhIdInput.style.boxShadow = '';
+                }, 3000);
+                
+                return;
+            }
+            
+            let diameter = parseFloat(diameterInput.value) || 0;
+            if (currentUnit === 'in') {
+                diameter = diameter * 25.4;
+            }
+            
+            const log = {
+                id: String(Date.now()),
+                timestamp: new Date().toLocaleString(),
+                bhId: bhId,
+                diameter: diameter.toFixed(1),
+                unit: 'mm',
+                wellDepth: parseFloat(wellDepthInput.value) || 0,
+                waterLevel: parseFloat(waterLevelInput.value) || 0,
+                standUp: parseFloat(standUpInput.value) || 0,
+                waterVolume: parseFloat(volumeDisplay.textContent) || 0,
+                purgeVolume: parseFloat(purgeDisplay.textContent) || 0,
+                notes: notesInput.value.trim()
+            };
+            
+            savedLogs.unshift(log);
+            localStorage.setItem('boreholeLogs', JSON.stringify(savedLogs));
+            
+            // Success feedback
+            const saveBtn = event.target;
+            const originalText = saveBtn.textContent;
+            saveBtn.textContent = 'âœ… Saved!';
+            saveBtn.style.background = 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)';
+            
+            setTimeout(() => {
+                saveBtn.textContent = originalText;
+                saveBtn.style.background = '';
+            }, 2000);
+            
+            updateBoreholeDropdown();
+        }
+        
+        function displayLogs() {
+            const container = document.getElementById('logsTableContainer');
+            
+            if (savedLogs.length === 0) {
+                container.innerHTML = '<div class="no-logs">No saved calculator logs yet.</div>';
+                return;
+            }
+            
+            let tableHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date/Time</th>
+                            <th>BH ID</th>
+                            <th>Diameter</th>
+                            <th>Depth (m bTOC)</th>
+                            <th>Water Level (m bTOC)</th>
+                            <th>Stand-up (m)</th>
+                            <th>Volume (L)</th>
+                            <th>Purge (L)</th>
+                            <th>Notes</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            savedLogs.forEach(log => {
+                tableHTML += `
+                    <tr>
+                        <td>${log.timestamp}</td>
+                        <td><strong>${log.bhId}</strong></td>
+                        <td>${log.diameter} mm</td>
+                        <td>${log.wellDepth.toFixed(2)}</td>
+                        <td>${log.waterLevel.toFixed(2)}</td>
+                        <td>${log.standUp.toFixed(2)}</td>
+                        <td>${log.waterVolume.toFixed(2)}</td>
+                        <td>${log.purgeVolume.toFixed(2)}</td>
+                        <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">${log.notes || '-'}</td>
+                        <td><button class="delete-btn" onclick="deleteLog(${log.id})">Delete</button></td>
+                    </tr>
+                `;
+            });
+            
+            tableHTML += `
+                    </tbody>
+                </table>
+            `;
+            
+            container.innerHTML = tableHTML;
+        }
+        
+        function deleteLog(id) {
+            console.log('Deleting log with ID:', id);
+            console.log('Current logs count:', savedLogs.length);
+            console.log('Saved logs:', savedLogs.map(l => l.id));
+            
+            if (!confirm('Are you sure you want to delete this log?')) {
+                return;
+            }
+            
+            const beforeLength = savedLogs.length;
+            savedLogs = savedLogs.filter(log => String(log.id) !== String(id));
+            const afterLength = savedLogs.length;
+            
+            console.log('After filter - Before:', beforeLength, 'After:', afterLength);
+            
+            if (beforeLength === afterLength) {
+                console.error('Log not found! ID:', id);
+                alert('Error: Log not found. The page may need to be refreshed.');
+                return;
+            }
+            
+            localStorage.setItem('boreholeLogs', JSON.stringify(savedLogs));
+            console.log('Saved to localStorage, now updating display...');
+            
+            // Force immediate re-render
+            displayLogs();
+            updateBoreholeDropdown();
+            
+            console.log('Delete complete. New count:', savedLogs.length);
+        }
+        
+        // Expose function to global scope
+        window.deleteLog = deleteLog;
+        
+        function clearAllCalculatorLogs() {
+            if (confirm('Are you sure you want to delete ALL calculator logs? This cannot be undone.')) {
+                savedLogs = [];
+                localStorage.setItem('boreholeLogs', JSON.stringify(savedLogs));
+                displayLogs();
+                updateBoreholeDropdown();
+            }
+        }
+        
+        window.clearAllCalculatorLogs = clearAllCalculatorLogs;
+        
+        function exportLogsCSV() {
+            if (savedLogs.length === 0) {
+                alert('No logs to export!');
+                return;
+            }
+            
+            let csv = 'Date/Time,BH ID,Diameter (mm),Depth (m bTOC),Water Level (m bTOC),Stand-up (m),Volume (L),Purge (L),Notes\n';
+            
+            savedLogs.forEach(log => {
+                const notes = (log.notes || '').replace(/"/g, '""');
+                csv += `"${log.timestamp}","${log.bhId}",${log.diameter},${log.wellDepth.toFixed(2)},${log.waterLevel.toFixed(2)},${log.standUp.toFixed(2)},${log.waterVolume.toFixed(2)},${log.purgeVolume.toFixed(2)},"${notes}"\n`;
+            });
+            
+            downloadCSV(csv, 'borehole-logs.csv');
+        }
+        
+        // Recovery tracking functions
+        function updateBoreholeDropdown() {
+            const dropdown = document.getElementById('linkBorehole');
+            dropdown.innerHTML = '<option value="">-- Manual Entry --</option>';
+            
+            savedLogs.forEach(log => {
+                const option = document.createElement('option');
+                option.value = log.id;
+                option.textContent = `${log.bhId} (${log.timestamp})`;
+                dropdown.appendChild(option);
+            });
+        }
+        
+        function toggleManualTime() {
+            const checkbox = document.getElementById('manualTimeCheckbox');
+            const manualTimeInput = document.getElementById('manualTimeInput');
+            const inputRow = document.querySelector('.measurement-input-row');
+            
+            if (checkbox.checked) {
+                manualTimeInput.style.display = 'flex';
+                inputRow.classList.add('with-manual-time');
+            } else {
+                manualTimeInput.style.display = 'none';
+                inputRow.classList.remove('with-manual-time');
+                document.getElementById('manualTime').value = '';
+            }
+        }
+        
+        function loadBoreholeData() {
+            const dropdown = document.getElementById('linkBorehole');
+            const selectedId = parseInt(dropdown.value);
+            
+            if (!selectedId) return;
+            
+            const log = savedLogs.find(l => l.id === selectedId);
+            if (log) {
+                document.getElementById('recoveryBhId').value = log.bhId;
+                document.getElementById('staticWaterLevel').value = log.waterLevel.toFixed(2);
+                document.getElementById('recoveryStandUp').value = log.standUp.toFixed(2);
+                document.getElementById('recoveryDiameter').value = log.diameter;
+                document.getElementById('recoveryWellDepth').value = log.wellDepth.toFixed(2);
+            }
+        }
+        
+        function addRecoveryMeasurement() {
+            const depth = parseFloat(document.getElementById('measuredDepth').value);
+            const staticLevel = parseFloat(document.getElementById('staticWaterLevel').value) || 0;
+            const manualTimeCheckbox = document.getElementById('manualTimeCheckbox');
+            const manualTimeValue = parseFloat(document.getElementById('manualTime').value);
+            
+            if (isNaN(depth)) {
+                alert('Please enter a valid water level value.');
+                return;
+            }
+            
+            const now = new Date();
+            let elapsedMin;
+            
+            // Check if manual time entry is enabled
+            if (manualTimeCheckbox.checked) {
+                if (isNaN(manualTimeValue) || manualTimeValue < 0) {
+                    alert('Please enter a valid time in minutes.');
+                    return;
+                }
+                elapsedMin = manualTimeValue;
+                
+                // Initialize test start time if first measurement
+                if (recoveryMeasurements.length === 0) {
+                    testStartTime = now;
+                }
+            } else {
+                // Initialize test start time if first measurement
+                if (recoveryMeasurements.length === 0) {
+                    testStartTime = now;
+                }
+                
+                // Calculate elapsed time in minutes
+                const elapsedMs = now - testStartTime;
+                elapsedMin = elapsedMs / 1000 / 60;
+            }
+            
+            const change = depth - staticLevel;
+            
+            recoveryMeasurements.push({ 
+                timestamp: now.toLocaleTimeString(),
+                time: elapsedMin, 
+                depth, 
+                change 
+            });
+            
+            // Sort by time to keep measurements in order
+            recoveryMeasurements.sort((a, b) => a.time - b.time);
+            
+            updateRecoveryTable();
+            calculateFlowRate();
+            drawRecoveryChart();
+            
+            // Update timestamp display
+            document.getElementById('lastTimestamp').textContent = `Last added: ${now.toLocaleTimeString()} (${elapsedMin.toFixed(2)} min)`;
+            
+            // Clear inputs
+            document.getElementById('measuredDepth').value = '';
+            if (manualTimeCheckbox.checked) {
+                document.getElementById('manualTime').value = '';
+            }
+        }
+        
+        function calculateFlowRate() {
+            if (recoveryMeasurements.length < 2) {
+                document.getElementById('flowRateDisplay').style.display = 'none';
+                return;
+            }
+            
+            const diameter = parseFloat(document.getElementById('recoveryDiameter').value) || 0;
+            const radius = (diameter / 2) / 1000; // Convert mm to m
+            const wellArea = Math.PI * radius * radius; // m²
+            
+            // Get first and last measurements
+            const first = recoveryMeasurements[0];
+            const last = recoveryMeasurements[recoveryMeasurements.length - 1];
+            
+            // Calculate water level change (m)
+            const depthChange = Math.abs(last.depth - first.depth);
+            
+            // Calculate time difference (minutes)
+            const timeDiff = last.time - first.time;
+            
+            if (timeDiff === 0) return;
+            
+            // Calculate volume change (L)
+            const volumeChange = depthChange * wellArea * 1000; // m³ to L
+            
+            // Calculate flow rate
+            const flowRateLPerMin = volumeChange / timeDiff;
+            const flowRateLPerSec = flowRateLPerMin / 60;
+            
+            // Display
+            document.getElementById('flowRateDisplay').style.display = 'block';
+            document.getElementById('flowRateValue').textContent = flowRateLPerSec.toFixed(3) + ' L/s';
+            document.getElementById('flowRateAlt').textContent = flowRateLPerMin.toFixed(2) + ' L/min';
+        }
+        
+        function updateRecoveryTable() {
+            const tbody = document.getElementById('recoveryMeasurementsBody');
+            
+            if (recoveryMeasurements.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="no-logs">No measurements yet. Add your first measurement above.</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = '';
+            recoveryMeasurements.forEach((m, index) => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${m.timestamp}</td>
+                    <td>${m.time.toFixed(2)}</td>
+                    <td>${m.depth.toFixed(3)}</td>
+                    <td>${m.change >= 0 ? '+' : ''}${m.change.toFixed(3)}</td>
+                    <td><button class="delete-btn" onclick="deleteRecoveryMeasurement(${index})">Delete</button></td>
+                `;
+            });
+        }
+        
+        function deleteRecoveryMeasurement(index) {
+            recoveryMeasurements.splice(index, 1);
+            
+            // Reset start time if all measurements deleted
+            if (recoveryMeasurements.length === 0) {
+                testStartTime = null;
+            }
+            
+            updateRecoveryTable();
+            calculateFlowRate();
+            drawRecoveryChart();
+        }
+        
+        function clearRecoveryMeasurements() {
+            if (confirm('Clear all measurements?')) {
+                recoveryMeasurements = [];
+                testStartTime = null;
+                updateRecoveryTable();
+                calculateFlowRate();
+                drawRecoveryChart();
+                document.getElementById('lastTimestamp').textContent = '';
+            }
+        }
+        
+        function drawRecoveryChart() {
+            const canvas = document.getElementById('recoveryChart');
+            const ctx = canvas.getContext('2d');
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            if (recoveryMeasurements.length === 0) {
+                ctx.font = '16px Arial';
+                ctx.fillStyle = '#999';
+                ctx.textAlign = 'center';
+                ctx.fillText('No data to display. Add measurements above.', canvas.width / 2, canvas.height / 2);
+                return;
+            }
+            
+            const padding = 60;
+            const chartWidth = canvas.width - 2 * padding;
+            const chartHeight = canvas.height - 2 * padding;
+            
+            const maxTime = Math.max(...recoveryMeasurements.map(m => m.time));
+            const minDepth = Math.min(...recoveryMeasurements.map(m => m.depth));
+            const maxDepth = Math.max(...recoveryMeasurements.map(m => m.depth));
+            const depthRange = maxDepth - minDepth || 1;
+            
+            // Draw axes
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(padding, padding);
+            ctx.lineTo(padding, canvas.height - padding);
+            ctx.lineTo(canvas.width - padding, canvas.height - padding);
+            ctx.stroke();
+            
+            // Draw grid lines
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 5; i++) {
+                const y = padding + (chartHeight * i / 5);
+                ctx.beginPath();
+                ctx.moveTo(padding, y);
+                ctx.lineTo(canvas.width - padding, y);
+                ctx.stroke();
+            }
+            
+            // Labels
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 14px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Time (minutes)', canvas.width / 2, canvas.height - 10);
+            
+            ctx.save();
+            ctx.translate(15, canvas.height / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('Water Level (m bgl)', 0, 0);
+            ctx.restore();
+            
+            // Y-axis labels
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'right';
+            for (let i = 0; i <= 5; i++) {
+                const depth = minDepth + (depthRange * i / 5);
+                const y = canvas.height - padding - (chartHeight * i / 5);
+                ctx.fillText(depth.toFixed(2), padding - 10, y + 5);
+            }
+            
+            // X-axis labels
+            ctx.textAlign = 'center';
+            for (let i = 0; i <= 5; i++) {
+                const time = maxTime * i / 5;
+                const x = padding + (chartWidth * i / 5);
+                ctx.fillText(time.toFixed(1), x, canvas.height - padding + 20);
+            }
+            
+            // Draw data points and line
+            if (recoveryMeasurements.length > 0) {
+                ctx.strokeStyle = '#667eea';
+                ctx.fillStyle = '#667eea';
+                ctx.lineWidth = 3;
+                
+                ctx.beginPath();
+                recoveryMeasurements.forEach((m, i) => {
+                    const x = padding + (m.time / maxTime) * chartWidth;
+                    const y = canvas.height - padding - ((m.depth - minDepth) / depthRange) * chartHeight;
+                    
+                    if (i === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                });
+                ctx.stroke();
+                
+                // Draw points
+                recoveryMeasurements.forEach(m => {
+                    const x = padding + (m.time / maxTime) * chartWidth;
+                    const y = canvas.height - padding - ((m.depth - minDepth) / depthRange) * chartHeight;
+                    
+                    ctx.beginPath();
+                    ctx.arc(x, y, 5, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+            }
+        }
+        
+        function saveRecoveryTest() {
+            const bhId = document.getElementById('recoveryBhId').value.trim();
+            const staticLevel = parseFloat(document.getElementById('staticWaterLevel').value) || 0;
+            const diameter = parseFloat(document.getElementById('recoveryDiameter').value) || 0;
+            const wellDepth = parseFloat(document.getElementById('recoveryWellDepth').value) || 0;
+            
+            if (!bhId) {
+                const bhIdInput = document.getElementById('recoveryBhId');
+                bhIdInput.style.borderColor = '#f5576c';
+                bhIdInput.style.boxShadow = '0 0 0 3px rgba(245, 87, 108, 0.3)';
+                bhIdInput.focus();
+                
+                alert('âš ï¸ Please enter a Borehole ID before saving.');
+                
+                setTimeout(() => {
+                    bhIdInput.style.borderColor = '';
+                    bhIdInput.style.boxShadow = '';
+                }, 3000);
+                
+                return;
+            }
+            
+            if (recoveryMeasurements.length === 0) {
+                alert('âš ï¸ Please add at least one measurement before saving.');
+                return;
+            }
+            
+            // Calculate flow rate
+            let flowRate = 0;
+            if (recoveryMeasurements.length >= 2) {
+                const radius = (diameter / 2) / 1000;
+                const wellArea = Math.PI * radius * radius;
+                const first = recoveryMeasurements[0];
+                const last = recoveryMeasurements[recoveryMeasurements.length - 1];
+                const depthChange = Math.abs(last.depth - first.depth);
+                const timeDiff = last.time - first.time;
+                if (timeDiff > 0) {
+                    const volumeChange = depthChange * wellArea * 1000;
+                    flowRate = volumeChange / timeDiff / 60; // L/s
+                }
+            }
+            
+            const test = {
+                id: String(Date.now()),
+                timestamp: new Date().toLocaleString(),
+                bhId,
+                staticLevel,
+                diameter,
+                wellDepth,
+                flowRate: flowRate.toFixed(3),
+                measurements: [...recoveryMeasurements]
+            };
+            
+            savedRecoveryTests.unshift(test);
+            localStorage.setItem('recoveryTests', JSON.stringify(savedRecoveryTests));
+            
+            alert('âœ… Recovery test saved successfully!');
+        }
+        
+        function displayRecoveryLogs() {
+            const container = document.getElementById('recoveryLogsTableContainer');
+            
+            if (savedRecoveryTests.length === 0) {
+                container.innerHTML = '<div class="no-logs">No saved recovery tests yet.</div>';
+                return;
+            }
+            
+            let tableHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date/Time</th>
+                            <th>BH ID</th>
+                            <th>Static Level (m bTOC)</th>
+                            <th>Measurements</th>
+                            <th>Avg Flow Rate (L/s)</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            savedRecoveryTests.forEach(test => {
+                tableHTML += `
+                    <tr>
+                        <td>${test.timestamp}</td>
+                        <td><strong>${test.bhId}</strong></td>
+                        <td>${test.staticLevel.toFixed(2)}</td>
+                        <td>${test.measurements.length}</td>
+                        <td>${test.flowRate}</td>
+                        <td>
+                            <button class="delete-btn" onclick="exportSingleRecoveryTest(${test.id})" style="background: #4CAF50;">Export</button>
+                            <button class="delete-btn" onclick="deleteRecoveryTest(${test.id})">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tableHTML += `
+                    </tbody>
+                </table>
+            `;
+            
+            container.innerHTML = tableHTML;
+        }
+        
+        function deleteRecoveryTest(id) {
+            console.log('Deleting recovery test:', id);
+            if (confirm('Are you sure you want to delete this recovery test?')) {
+                savedRecoveryTests = savedRecoveryTests.filter(test => String(test.id) !== String(id));
+                localStorage.setItem('recoveryTests', JSON.stringify(savedRecoveryTests));
+                displayRecoveryLogs();
+            }
+        }
+        
+        window.deleteRecoveryTest = deleteRecoveryTest;
+        
+        function clearAllRecoveryTests() {
+            if (confirm('Are you sure you want to delete ALL recovery tests? This cannot be undone.')) {
+                savedRecoveryTests = [];
+                localStorage.setItem('recoveryTests', JSON.stringify(savedRecoveryTests));
+                displayRecoveryLogs();
+            }
+        }
+        
+        window.clearAllRecoveryTests = clearAllRecoveryTests;
+        
+        function exportRecoveryCSV() {
+            const bhId = document.getElementById('recoveryBhId').value.trim() || 'Unknown';
+            const staticLevel = parseFloat(document.getElementById('staticWaterLevel').value) || 0;
+            const diameter = parseFloat(document.getElementById('recoveryDiameter').value) || 0;
+            const wellDepth = parseFloat(document.getElementById('recoveryWellDepth').value) || 0;
+            
+            if (recoveryMeasurements.length === 0) {
+                alert('No measurements to export!');
+                return;
+            }
+            
+            let csv = `Borehole ID: ${bhId}\n`;
+            csv += `Static Water Level: ${staticLevel.toFixed(3)} m bTOC\n`;
+            csv += `Well Diameter: ${diameter} mm\n`;
+            csv += `Well Depth: ${wellDepth.toFixed(2)} m\n`;
+            csv += `Date: ${new Date().toLocaleString()}\n\n`;
+            csv += 'Timestamp,Elapsed Time (min),Water Level (m bTOC),Change from Static (m)\n';
+            
+            recoveryMeasurements.forEach(m => {
+                csv += `${m.timestamp},${m.time.toFixed(2)},${m.depth.toFixed(3)},${m.change.toFixed(3)}\n`;
+            });
+            
+            downloadCSV(csv, `recovery-test-${bhId}-${Date.now()}.csv`);
+        }
+        
+        function exportSingleRecoveryTest(id) {
+            const test = savedRecoveryTests.find(t => t.id === id);
+            if (!test) return;
+            
+            let csv = `Borehole ID: ${test.bhId}\n`;
+            csv += `Static Water Level: ${test.staticLevel.toFixed(3)} m bTOC\n`;
+            csv += `Well Diameter: ${test.diameter} mm\n`;
+            csv += `Well Depth: ${test.wellDepth.toFixed(2)} m\n`;
+            csv += `Average Flow Rate: ${test.flowRate} L/s\n`;
+            csv += `Date: ${test.timestamp}\n\n`;
+            csv += 'Timestamp,Elapsed Time (min),Water Level (m bTOC),Change from Static (m)\n';
+            
+            test.measurements.forEach(m => {
+                csv += `${m.timestamp},${m.time.toFixed(2)},${m.depth.toFixed(3)},${m.change.toFixed(3)}\n`;
+            });
+            
+            downloadCSV(csv, `recovery-test-${test.bhId}-${test.id}.csv`);
+        }
+        
+        window.exportSingleRecoveryTest = exportSingleRecoveryTest;
+        
+        function exportAllRecoveryTestsCSV() {
+            if (savedRecoveryTests.length === 0) {
+                alert('No recovery tests to export!');
+                return;
+            }
+            
+            let csv = 'Date/Time,BH ID,Static Level (m bgl),Diameter (mm),Depth (m),Measurements Count,Avg Flow Rate (L/s)\n';
+            
+            savedRecoveryTests.forEach(test => {
+                csv += `"${test.timestamp}","${test.bhId}",${test.staticLevel.toFixed(2)},${test.diameter},${test.wellDepth.toFixed(2)},${test.measurements.length},${test.flowRate}\n`;
+            });
+            
+            downloadCSV(csv, 'all-recovery-tests.csv');
+        }
+        
+        function downloadCSV(csv, filename) {
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+        
+        // Add event listeners
+        diameterInput.addEventListener('input', calculateAndDraw);
+        wellDepthInput.addEventListener('input', calculateAndDraw);
+        waterLevelInput.addEventListener('input', calculateAndDraw);
+        standUpInput.addEventListener('input', calculateAndDraw);
+        
+        // Initial draw
+        calculateAndDraw();
+        updateBoreholeDropdown();
+        
+        // Hide splash screen after page loads
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                const splash = document.getElementById('splash-screen');
+                splash.classList.add('fade-out');
+                setTimeout(function() {
+                    splash.style.display = 'none';
+                }, 500);
+            }, 1500); // Show splash for 1.5 seconds
+        });
+        
+        // =============================================
+        //  GROUNDWATER LEVELS MODULE
+        // =============================================
+
+        let gwPoints = JSON.parse(localStorage.getItem('gwPoints')) || [];
+        let activeGWPointId = null;
+
+        function saveGWPoints() {
+            localStorage.setItem('gwPoints', JSON.stringify(gwPoints));
+        }
+
+        // ----- Modal -----
+        function openNewPointModal() {
+            // Set datetime-local default to now
+            document.getElementById('npPointId').value = '';
+            document.getElementById('npDescription').value = '';
+            document.getElementById('npEasting').value = '';
+            document.getElementById('npNorthing').value = '';
+            document.getElementById('npRLTOC').value = '';
+            document.getElementById('npDiameter').value = '50';
+            document.getElementById('npDepth').value = '';
+            document.getElementById('npStandUp').value = '0.5';
+            document.getElementById('npNotes').value = '';
+            document.getElementById('newPointModalBg').classList.add('open');
+        }
+        window.openNewPointModal = openNewPointModal;
+
+        function closeNewPointModal() {
+            document.getElementById('newPointModalBg').classList.remove('open');
+        }
+        window.closeNewPointModal = closeNewPointModal;
+
+        // Close modal on background click
+        document.getElementById('newPointModalBg').addEventListener('click', function(e) {
+            if (e.target === this) closeNewPointModal();
+        });
+
+        function saveNewPoint() {
+            const pointId = document.getElementById('npPointId').value.trim();
+            if (!pointId) {
+                document.getElementById('npPointId').style.borderColor = '#f5576c';
+                document.getElementById('npPointId').focus();
+                alert('Please enter a Point ID.');
+                setTimeout(() => { document.getElementById('npPointId').style.borderColor = ''; }, 3000);
+                return;
+            }
+            if (gwPoints.find(p => p.id === pointId)) {
+                alert('A point with this ID already exists. Please use a unique ID.');
+                return;
+            }
+            const point = {
+                id: pointId,
+                description: document.getElementById('npDescription').value.trim(),
+                easting: parseFloat(document.getElementById('npEasting').value) || null,
+                northing: parseFloat(document.getElementById('npNorthing').value) || null,
+                rlTOC: parseFloat(document.getElementById('npRLTOC').value) || null,
+                diameter: parseFloat(document.getElementById('npDiameter').value) || 50,
+                depth: parseFloat(document.getElementById('npDepth').value) || null,
+                standUp: parseFloat(document.getElementById('npStandUp').value) || 0,
+                notes: document.getElementById('npNotes').value.trim(),
+                createdAt: new Date().toLocaleString(),
+                readings: []
+            };
+            gwPoints.unshift(point);
+            saveGWPoints();
+            closeNewPointModal();
+            renderGWPoints();
+        }
+        window.saveNewPoint = saveNewPoint;
+
+        // ----- List View -----
+        function renderGWPoints() {
+            const grid = document.getElementById('gwPointsGrid');
+            if (gwPoints.length === 0) {
+                grid.innerHTML = '<div class="no-logs" style="grid-column:1/-1">No monitoring points yet. Click <strong>+ New Point</strong> to get started.</div>';
+                return;
+            }
+            grid.innerHTML = '';
+            gwPoints.forEach(point => {
+                const readings = point.readings || [];
+                const latestReading = readings.length > 0 ? readings[readings.length - 1] : null;
+                const prevReading = readings.length > 1 ? readings[readings.length - 2] : null;
+
+                let trendHtml = '';
+                if (latestReading && prevReading) {
+                    const diff = latestReading.depth - prevReading.depth;
+                    if (diff > 0.005) trendHtml = `<span class="trend-down" title="Rising (shallower)">↑ ${Math.abs(diff).toFixed(3)} m</span>`;
+                    else if (diff < -0.005) trendHtml = `<span class="trend-up" title="Falling (deeper)">↓ ${Math.abs(diff).toFixed(3)} m</span>`;
+                    else trendHtml = `<span class="trend-flat">→ stable</span>`;
+                }
+
+                const latestHtml = latestReading
+                    ? `<div class="card-latest">Latest: <strong>${latestReading.depth.toFixed(3)} m bTOC</strong>
+                        ${point.rlTOC != null ? `<span style="color:#777"> | RL ${(point.rlTOC - latestReading.depth).toFixed(3)} m AHD</span>` : ''}
+                        <br><span style="color:#999; font-size:12px;">${latestReading.datetime}</span>
+                        ${trendHtml ? `<span style="margin-left:10px; font-size:13px;">${trendHtml}</span>` : ''}
+                       </div>`
+                    : `<div class="card-latest" style="color:#aaa; font-style:italic;">No readings yet</div>`;
+
+                const card = document.createElement('div');
+                card.className = 'gw-point-card';
+                card.innerHTML = `
+                    <div class="card-badge">${readings.length} reading${readings.length !== 1 ? 's' : ''}</div>
+                    <div class="card-title">${point.id}</div>
+                    ${point.description ? `<div class="card-meta">${point.description}</div>` : ''}
+                    ${point.rlTOC != null ? `<div class="card-meta">TOC RL: ${point.rlTOC} m AHD</div>` : ''}
+                    ${point.depth != null ? `<div class="card-meta">Depth: ${point.depth} m | Ø ${point.diameter} mm</div>` : ''}
+                    ${latestHtml}
+                    <div class="card-actions">
+                        <button class="save-btn" onclick="openGWPoint('${point.id}')" style="flex:1; font-size:14px; padding:10px;">Open</button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+        window.renderGWPoints = renderGWPoints;
+
+        // ----- Detail View -----
+        function openGWPoint(pointId) {
+            const point = gwPoints.find(p => p.id === pointId);
+            if (!point) return;
+            activeGWPointId = pointId;
+
+            document.getElementById('gw-list-view').style.display = 'none';
+            document.getElementById('gw-detail-view').style.display = 'block';
+
+            document.getElementById('gwDetailTitle').textContent = point.id + (point.description ? ' — ' + point.description : '');
+
+            const metaParts = [];
+            if (point.rlTOC != null) metaParts.push(`TOC RL: ${point.rlTOC} m AHD`);
+            if (point.depth != null) metaParts.push(`Depth: ${point.depth} m bTOC`);
+            if (point.diameter) metaParts.push(`Ø ${point.diameter} mm`);
+            if (point.easting && point.northing) metaParts.push(`E ${point.easting} N ${point.northing}`);
+            document.getElementById('gwDetailMeta').innerHTML = metaParts.map(p => `<span>${p}</span>`).join('');
+
+            // Set default datetime to now
+            const now = new Date();
+            const pad = n => String(n).padStart(2, '0');
+            document.getElementById('gwReadingDate').value =
+                `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+
+            renderGWStats(point);
+            renderGWReadingsTable(point);
+            renderGWChart(point);
+            populateDiffSelects(point);
+
+            document.getElementById('gwDiffPanel').style.display = (point.readings.length >= 2) ? 'block' : 'none';
+        }
+        window.openGWPoint = openGWPoint;
+
+        function showGWListView() {
+            activeGWPointId = null;
+            document.getElementById('gw-list-view').style.display = 'block';
+            document.getElementById('gw-detail-view').style.display = 'none';
+            renderGWPoints();
+        }
+        window.showGWListView = showGWListView;
+
+        function renderGWStats(point) {
+            const readings = point.readings || [];
+            const bar = document.getElementById('gwStatBar');
+            if (readings.length === 0) {
+                bar.innerHTML = '<div class="gw-stat"><div class="stat-label">Readings</div><div class="stat-value">0</div></div>';
+                return;
+            }
+            const depths = readings.map(r => r.depth);
+            const latest = readings[readings.length - 1];
+            const minDepth = Math.min(...depths);
+            const maxDepth = Math.max(...depths);
+            const rlLatest = point.rlTOC != null ? (point.rlTOC - latest.depth) : null;
+
+            let statsHTML = `
+                <div class="gw-stat">
+                    <div class="stat-label">Readings</div>
+                    <div class="stat-value">${readings.length}</div>
+                </div>
+                <div class="gw-stat">
+                    <div class="stat-label">Latest Depth</div>
+                    <div class="stat-value">${latest.depth.toFixed(3)}</div>
+                    <div class="stat-unit">m bTOC</div>
+                </div>
+            `;
+            if (rlLatest != null) {
+                statsHTML += `
+                    <div class="gw-stat">
+                        <div class="stat-label">Latest RL</div>
+                        <div class="stat-value">${rlLatest.toFixed(3)}</div>
+                        <div class="stat-unit">m AHD</div>
+                    </div>
+                `;
+            }
+            statsHTML += `
+                <div class="gw-stat">
+                    <div class="stat-label">Shallowest</div>
+                    <div class="stat-value">${minDepth.toFixed(3)}</div>
+                    <div class="stat-unit">m bTOC</div>
+                </div>
+                <div class="gw-stat">
+                    <div class="stat-label">Deepest</div>
+                    <div class="stat-value">${maxDepth.toFixed(3)}</div>
+                    <div class="stat-unit">m bTOC</div>
+                </div>
+                <div class="gw-stat">
+                    <div class="stat-label">Range</div>
+                    <div class="stat-value">${(maxDepth - minDepth).toFixed(3)}</div>
+                    <div class="stat-unit">m</div>
+                </div>
+            `;
+            bar.innerHTML = statsHTML;
+        }
+
+        function addGWReading() {
+            const point = gwPoints.find(p => p.id === activeGWPointId);
+            if (!point) return;
+
+            const depthVal = parseFloat(document.getElementById('gwReadingDepth').value);
+            const datetimeVal = document.getElementById('gwReadingDate').value;
+            const notesVal = document.getElementById('gwReadingNotes').value.trim();
+
+            if (isNaN(depthVal)) { alert('Please enter a valid depth to water.'); return; }
+            if (!datetimeVal) { alert('Please enter a date/time.'); return; }
+
+            const reading = {
+                datetime: datetimeVal.replace('T', ' '),
+                depth: depthVal,
+                notes: notesVal
+            };
+
+            point.readings.push(reading);
+            // Sort chronologically
+            point.readings.sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+            saveGWPoints();
+
+            document.getElementById('gwReadingDepth').value = '';
+            document.getElementById('gwReadingNotes').value = '';
+
+            renderGWStats(point);
+            renderGWReadingsTable(point);
+            renderGWChart(point);
+            populateDiffSelects(point);
+            document.getElementById('gwDiffPanel').style.display = (point.readings.length >= 2) ? 'block' : 'none';
+        }
+        window.addGWReading = addGWReading;
+
+        function renderGWReadingsTable(point) {
+            const tbody = document.getElementById('gwReadingsBody');
+            const readings = point.readings || [];
+            if (readings.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="no-logs">No readings recorded yet.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = '';
+            // Display newest first
+            [...readings].reverse().forEach((r, revIdx) => {
+                const idx = readings.length - 1 - revIdx;
+                const prev = idx > 0 ? readings[idx - 1] : null;
+                const change = prev ? (r.depth - prev.depth) : null;
+                const rl = point.rlTOC != null ? (point.rlTOC - r.depth).toFixed(3) : '—';
+                let changeHtml = '—';
+                if (change !== null) {
+                    const sign = change >= 0 ? '+' : '';
+                    const cls = change > 0.005 ? 'trend-up' : (change < -0.005 ? 'trend-down' : 'trend-flat');
+                    changeHtml = `<span class="${cls}">${sign}${change.toFixed(3)}</span>`;
+                }
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${r.datetime}</td>
+                    <td><strong>${r.depth.toFixed(3)}</strong></td>
+                    <td>${rl}</td>
+                    <td>${changeHtml}</td>
+                    <td style="max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${r.notes || '—'}</td>
+                    <td><button class="delete-btn" onclick="deleteGWReading(${idx})">Delete</button></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function deleteGWReading(idx) {
+            if (!confirm('Delete this reading?')) return;
+            const point = gwPoints.find(p => p.id === activeGWPointId);
+            if (!point) return;
+            point.readings.splice(idx, 1);
+            saveGWPoints();
+            renderGWStats(point);
+            renderGWReadingsTable(point);
+            renderGWChart(point);
+            populateDiffSelects(point);
+            document.getElementById('gwDiffPanel').style.display = (point.readings.length >= 2) ? 'block' : 'none';
+        }
+        window.deleteGWReading = deleteGWReading;
+
+        function deleteGWPoint() {
+            const point = gwPoints.find(p => p.id === activeGWPointId);
+            if (!point) return;
+            if (!confirm(`Delete point "${point.id}" and all its readings? This cannot be undone.`)) return;
+            gwPoints = gwPoints.filter(p => p.id !== activeGWPointId);
+            saveGWPoints();
+            showGWListView();
+        }
+        window.deleteGWPoint = deleteGWPoint;
+
+        // ----- Chart -----
+        function renderGWChart(point) {
+            const cvs = document.getElementById('gwLevelsChart');
+            const c = cvs.getContext('2d');
+            c.clearRect(0, 0, cvs.width, cvs.height);
+
+            const readings = point.readings || [];
+            if (readings.length === 0) {
+                c.font = '15px Arial';
+                c.fillStyle = '#aaa';
+                c.textAlign = 'center';
+                c.fillText('No readings to display.', cvs.width / 2, cvs.height / 2);
+                return;
+            }
+
+            const pad = { top: 30, right: 40, bottom: 50, left: 70 };
+            const W = cvs.width - pad.left - pad.right;
+            const H = cvs.height - pad.top - pad.bottom;
+
+            const depths = readings.map(r => r.depth);
+            const minD = Math.min(...depths);
+            const maxD = Math.max(...depths);
+            const dRange = maxD - minD || 0.5;
+            const dMin = minD - dRange * 0.1;
+            const dMax = maxD + dRange * 0.1;
+
+            const timestamps = readings.map(r => new Date(r.datetime).getTime());
+            const tMin = Math.min(...timestamps);
+            const tMax = Math.max(...timestamps);
+            const tRange = tMax - tMin || 1;
+
+            const toX = t => pad.left + ((t - tMin) / tRange) * W;
+            // Invert Y: shallower depth = higher on chart
+            const toY = d => pad.top + ((d - dMin) / (dMax - dMin)) * H;
+
+            // Grid
+            c.strokeStyle = '#e8e8e8';
+            c.lineWidth = 1;
+            for (let i = 0; i <= 4; i++) {
+                const y = pad.top + (H / 4) * i;
+                c.beginPath(); c.moveTo(pad.left, y); c.lineTo(pad.left + W, y); c.stroke();
+                const x = pad.left + (W / 4) * i;
+                c.beginPath(); c.moveTo(x, pad.top); c.lineTo(x, pad.top + H); c.stroke();
+            }
+
+            // Axes
+            c.strokeStyle = '#333';
+            c.lineWidth = 2;
+            c.beginPath();
+            c.moveTo(pad.left, pad.top);
+            c.lineTo(pad.left, pad.top + H);
+            c.lineTo(pad.left + W, pad.top + H);
+            c.stroke();
+
+            // Y axis labels (depth)
+            c.fillStyle = '#555';
+            c.font = '11px Arial';
+            c.textAlign = 'right';
+            for (let i = 0; i <= 4; i++) {
+                const d = dMin + ((dMax - dMin) / 4) * i;
+                const y = toY(d);
+                c.fillText(d.toFixed(2), pad.left - 6, y + 4);
+            }
+
+            // X axis labels (dates)
+            c.textAlign = 'center';
+            c.font = '10px Arial';
+            for (let i = 0; i <= 4; i++) {
+                const t = tMin + (tRange / 4) * i;
+                const x = toX(t);
+                const d = new Date(t);
+                const label = `${d.getDate()}/${d.getMonth()+1}\n${d.getFullYear()}`;
+                const parts = label.split('\n');
+                c.fillText(parts[0], x, pad.top + H + 16);
+                c.fillText(parts[1], x, pad.top + H + 28);
+            }
+
+            // Axis labels
+            c.save();
+            c.translate(14, pad.top + H / 2);
+            c.rotate(-Math.PI / 2);
+            c.textAlign = 'center';
+            c.font = 'bold 12px Arial';
+            c.fillStyle = '#333';
+            c.fillText('Depth to Water (m bTOC)', 0, 0);
+            c.restore();
+
+            // Y axis note: inverted
+            c.fillStyle = '#999';
+            c.font = '10px Arial';
+            c.textAlign = 'right';
+            c.fillText('↑ shallower', pad.left - 4, pad.top + 10);
+            c.fillText('↓ deeper', pad.left - 4, pad.top + H - 2);
+
+            // Filled area under line
+            if (readings.length > 1) {
+                c.beginPath();
+                c.moveTo(toX(timestamps[0]), pad.top + H);
+                readings.forEach((r, i) => {
+                    c.lineTo(toX(timestamps[i]), toY(r.depth));
+                });
+                c.lineTo(toX(timestamps[timestamps.length - 1]), pad.top + H);
+                c.closePath();
+                c.fillStyle = 'rgba(30, 58, 138, 0.08)';
+                c.fill();
+            }
+
+            // Line
+            c.strokeStyle = '#1e3a8a';
+            c.lineWidth = 2.5;
+            c.lineJoin = 'round';
+            c.beginPath();
+            readings.forEach((r, i) => {
+                const x = toX(timestamps[i]);
+                const y = toY(r.depth);
+                i === 0 ? c.moveTo(x, y) : c.lineTo(x, y);
+            });
+            c.stroke();
+
+            // Points
+            readings.forEach((r, i) => {
+                const x = toX(timestamps[i]);
+                const y = toY(r.depth);
+                c.beginPath();
+                c.arc(x, y, 5, 0, Math.PI * 2);
+                c.fillStyle = '#1e3a8a';
+                c.fill();
+                c.strokeStyle = 'white';
+                c.lineWidth = 1.5;
+                c.stroke();
+            });
+
+            // Latest value label
+            const lastR = readings[readings.length - 1];
+            const lx = toX(timestamps[timestamps.length - 1]);
+            const ly = toY(lastR.depth);
+            c.fillStyle = '#1e3a8a';
+            c.font = 'bold 12px Arial';
+            c.textAlign = 'left';
+            c.fillText(`${lastR.depth.toFixed(3)} m`, lx + 8, ly + 4);
+        }
+
+        // ----- Differential Calculator -----
+        function populateDiffSelects(point) {
+            const sel1 = document.getElementById('gwDiffDate1');
+            const sel2 = document.getElementById('gwDiffDate2');
+            sel1.innerHTML = '';
+            sel2.innerHTML = '';
+            const readings = [...(point.readings || [])].reverse();
+            readings.forEach((r, i) => {
+                const label = `${r.datetime} — ${r.depth.toFixed(3)} m`;
+                sel1.add(new Option(label, i));
+                sel2.add(new Option(label, i));
+            });
+            if (readings.length >= 2) sel2.selectedIndex = 1;
+        }
+
+        function calcDiff() {
+            const point = gwPoints.find(p => p.id === activeGWPointId);
+            if (!point) return;
+            const readings = [...(point.readings || [])].reverse();
+            const i1 = parseInt(document.getElementById('gwDiffDate1').value);
+            const i2 = parseInt(document.getElementById('gwDiffDate2').value);
+            if (i1 === i2) { alert('Please select two different readings.'); return; }
+            const r1 = readings[i1];
+            const r2 = readings[i2];
+            const diff = r2.depth - r1.depth;
+            const sign = diff > 0 ? '+' : '';
+            const direction = diff > 0.005 ? 'Water fell (deeper)' : diff < -0.005 ? 'Water rose (shallower)' : 'No significant change';
+            document.getElementById('gwDiffValue').textContent = `${sign}${diff.toFixed(3)} m`;
+            document.getElementById('gwDiffLabel').textContent = `${r1.datetime} → ${r2.datetime} | ${direction}`;
+            document.getElementById('gwDiffResult').style.display = 'block';
+        }
+        window.calcDiff = calcDiff;
+
+        // ----- Export -----
+        function exportGWReadingsCSV() {
+            const point = gwPoints.find(p => p.id === activeGWPointId);
+            if (!point) return;
+            if (point.readings.length === 0) { alert('No readings to export.'); return; }
+
+            let csv = `Point ID: ${point.id}\n`;
+            if (point.description) csv += `Description: ${point.description}\n`;
+            if (point.rlTOC != null) csv += `TOC RL: ${point.rlTOC} m AHD\n`;
+            if (point.depth != null) csv += `Well Depth: ${point.depth} m bTOC\n`;
+            csv += `Exported: ${new Date().toLocaleString()}\n\n`;
+            csv += `Date/Time,Depth to Water (m bTOC),RL Water Level (m AHD),Change from Previous (m),Notes\n`;
+
+            point.readings.forEach((r, i) => {
+                const prev = i > 0 ? point.readings[i - 1] : null;
+                const change = prev ? (r.depth - prev.depth).toFixed(3) : '';
+                const rl = point.rlTOC != null ? (point.rlTOC - r.depth).toFixed(3) : '';
+                const notes = (r.notes || '').replace(/"/g, '""');
+                csv += `"${r.datetime}",${r.depth.toFixed(3)},${rl},${change},"${notes}"\n`;
+            });
+
+            downloadCSV(csv, `gw-levels-${point.id}-${Date.now()}.csv`);
+        }
+        window.exportGWReadingsCSV = exportGWReadingsCSV;
+
+    </script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .catch(err => console.log('SW registration failed:', err));
+            });
+        }
+    </script>
+</body>
+</html>
