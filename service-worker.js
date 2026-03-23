@@ -1,7 +1,7 @@
 // Borehole Master — Service Worker
 // Caches the app for full offline use in the field
 
-const CACHE_NAME = 'borehole-master-v1';
+const CACHE_NAME = 'borehole-master-v2';
 const ASSETS = [
   '/index.html',
   '/manifest.json',
