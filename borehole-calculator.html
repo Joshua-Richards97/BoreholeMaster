@@ -463,7 +463,7 @@
         .splash-logo svg { width: 100%; height: 100%; }
         .splash-wordmark { display: flex; flex-direction: column; align-items: center; gap: 2px; }
         .splash-title-top { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 28px; font-weight: 800; letter-spacing: -0.5px; color: white; line-height: 1; }
-        .splash-title-bottom { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 28px; font-weight: 300; letter-spacing: 8px; color: #93c5fd; line-height: 1; }
+        .splash-title-bottom { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 28px; font-weight: 300; letter-spacing: 8px; color: #93c5fd; line-height: 1; text-indent: 8px; }
         .splash-divider { width: 120px; height: 1px; background: rgba(255,255,255,0.25); margin: 12px 0 8px; }
         .splash-subtitle { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 10px; font-weight: 400; letter-spacing: 2.5px; color: rgba(255,255,255,0.55); text-transform: uppercase; }
 
@@ -1202,6 +1202,7 @@
                 <span class="nav-label">Logs</span>
             </button>
         </nav>
+
 
     </div><!-- /.app-shell -->
 
@@ -5237,6 +5238,8 @@
                     .catch(e => console.log('SW registration skipped:', e.message));
             });
         }
+
+
 
     </script>
 </body>
