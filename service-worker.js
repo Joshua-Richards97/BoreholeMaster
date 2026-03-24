@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'borehole-master-v3';
+const CACHE_VERSION = 'borehole-master-v38';
 const ASSETS = [
   './',
   './borehole-calculator.html',

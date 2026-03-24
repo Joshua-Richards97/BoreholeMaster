@@ -1371,20 +1371,90 @@
                     </select>
                 </div>
                 <div id="bhListCount" style="font-size:11px;color:var(--hint);margin-bottom:6px;"></div>
-                <div id="bhFirstRunTip" style="display:none;background:linear-gradient(135deg,#eff6ff,#dbeafe);border:1.5px solid #bfdbfe;border-radius:14px;padding:16px;margin-bottom:12px;">
-                    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
-                        <div style="font-size:14px;font-weight:800;color:var(--navy);">👋 Welcome to Borehole Master</div>
-                        <button onclick="dismissFirstRunTip()" style="background:none;border:none;font-size:18px;color:var(--hint);cursor:pointer;padding:0;line-height:1;">×</button>
+                <!-- ── ONBOARDING (shown until first BH saved) ── -->
+                <div id="bhFirstRunTip" style="display:none;margin-bottom:12px;">
+
+                    <!-- Welcome header -->
+                    <div style="background:linear-gradient(135deg,var(--navy),var(--blue2));border-radius:14px;padding:16px;margin-bottom:8px;">
+                        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
+                            <div style="font-size:15px;font-weight:900;color:white;letter-spacing:-0.3px;">👋 Welcome to Borehole Master</div>
+                            <button onclick="dismissFirstRunTip()" style="background:rgba(255,255,255,0.2);border:none;border-radius:6px;font-size:13px;color:white;cursor:pointer;padding:2px 8px;line-height:1.5;">Skip</button>
+                        </div>
+                        <div style="font-size:12px;color:rgba(255,255,255,0.75);line-height:1.5;">
+                            A field hydrogeology tool. Follow three steps to get started — the app guides you from there.
+                        </div>
                     </div>
-                    <div style="font-size:13px;color:var(--blue2);line-height:1.5;margin-bottom:12px;">
-                        The natural workflow is:<br>
-                        <strong>1. Create a Project</strong> (tap the banner above)<br>
-                        <strong>2. Add a Borehole</strong> — registers location &amp; construction<br>
-                        <strong>3. Record measurements</strong> — the app guides you from there
+
+                    <!-- Step 1 -->
+                    <div id="onboardStep1" class="section-card" style="border-left:4px solid var(--navy);margin-bottom:6px;padding:14px;">
+                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+                            <div style="width:26px;height:26px;border-radius:50%;background:var(--navy);color:white;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div>
+                            <div>
+                                <div style="font-size:14px;font-weight:800;color:var(--navy);">Create a Project</div>
+                                <div style="font-size:11px;color:var(--muted);">Group boreholes by site or campaign</div>
+                            </div>
+                            <div id="onboardStep1Check" style="display:none;margin-left:auto;font-size:18px;">✅</div>
+                        </div>
+                        <div style="font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:10px;">
+                            Projects organise your boreholes and measurements. Everything you record — purge logs, GW readings, recovery tests, chemistry — links back here.
+                        </div>
+                        <button id="onboardBtn1" onclick="openNewProjectModal();_onboardMarkStep(1);"
+                            style="width:100%;padding:11px;background:var(--navy);color:white;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;">
+                            📁 Create First Project
+                        </button>
                     </div>
-                    <button onclick="openNewProjectModal();dismissFirstRunTip();" style="width:100%;padding:11px;background:var(--navy);color:white;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">
-                        + Create First Project
-                    </button>
+
+                    <!-- Step 2 -->
+                    <div id="onboardStep2" class="section-card" style="border-left:4px solid var(--blue2);margin-bottom:6px;padding:14px;opacity:0.5;pointer-events:none;">
+                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+                            <div style="width:26px;height:26px;border-radius:50%;background:var(--blue2);color:white;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div>
+                            <div>
+                                <div style="font-size:14px;font-weight:800;color:var(--navy);">Register a Borehole</div>
+                                <div style="font-size:11px;color:var(--muted);">Construction details, location, depth</div>
+                            </div>
+                            <div id="onboardStep2Check" style="display:none;margin-left:auto;font-size:18px;">✅</div>
+                        </div>
+                        <div style="font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:10px;">
+                            A borehole is the central record. Adding one auto-creates a GW monitoring point and makes it the active borehole — all measurement tabs pre-fill from it.
+                        </div>
+                        <button id="onboardBtn2" onclick="openNewBoreholeModal();_onboardMarkStep(2);"
+                            style="width:100%;padding:11px;background:var(--blue2);color:white;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;">
+                            🕳️ Add First Borehole
+                        </button>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div id="onboardStep3" class="section-card" style="border-left:4px solid #16a34a;margin-bottom:6px;padding:14px;opacity:0.5;pointer-events:none;">
+                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+                            <div style="width:26px;height:26px;border-radius:50%;background:#16a34a;color:white;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div>
+                            <div>
+                                <div style="font-size:14px;font-weight:800;color:var(--navy);">Start Recording</div>
+                                <div style="font-size:11px;color:var(--muted);">Choose your measurement type</div>
+                            </div>
+                        </div>
+                        <div style="font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:10px;">
+                            All tabs share the active borehole — parameters pre-fill automatically. Pick your first task:
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+                            <button onclick="switchScreen('calculator');dismissFirstRunTip();"
+                                style="padding:10px 6px;background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:10px;font-size:12px;font-weight:700;color:var(--navy);cursor:pointer;">
+                                📋 Purge Log
+                            </button>
+                            <button onclick="switchScreen('gwlevels');dismissFirstRunTip();"
+                                style="padding:10px 6px;background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;font-size:12px;font-weight:700;color:#166534;cursor:pointer;">
+                                💧 GW Level
+                            </button>
+                            <button onclick="switchScreen('recovery');dismissFirstRunTip();"
+                                style="padding:10px 6px;background:#fef3c7;border:1.5px solid #fbbf24;border-radius:10px;font-size:12px;font-weight:700;color:#92400e;cursor:pointer;">
+                                📈 Recovery Test
+                            </button>
+                            <button onclick="switchScreen('recovery');setTimeout(()=>switchSampleSubTab('chemistry'),100);dismissFirstRunTip();"
+                                style="padding:10px 6px;background:#fdf4ff;border:1.5px solid #e9d5ff;border-radius:10px;font-size:12px;font-weight:700;color:#6b21a8;cursor:pointer;">
+                                🧪 GW Chemistry
+                            </button>
+                        </div>
+                    </div>
+
                 </div>
                 <div id="bhListContainer"><div class="no-data">No boreholes yet.<br>Tap <strong>+ New BH</strong> to register a borehole.</div></div>
             </div>
@@ -8288,6 +8358,7 @@
             saveBoreholes();
             closeNewBHModal();
             renderBoreholeList();
+            if (typeof _onboardRefresh === 'function') _onboardRefresh();
 
             // CHANGE 3: Auto-create GW monitoring point if none exists
             if (!gwPoints.find(p => p.id === bh.id)) {
@@ -9516,6 +9587,47 @@
 
 
         // ── First-run tip ─────────────────────────────────────────
+        // Onboarding step tracker
+        function _onboardMarkStep(step) {
+            try { localStorage.setItem('_onboardStep', String(step)); } catch(e) {}
+            _onboardRefresh();
+        }
+        window._onboardMarkStep = _onboardMarkStep;
+
+        function _onboardRefresh() {
+            const step = parseInt(localStorage.getItem('_onboardStep')||'0');
+            const hasProject = (typeof projects!=='undefined') && projects.length > 0;
+            const hasBH = (typeof boreholes!=='undefined') && boreholes.length > 0;
+
+            // Step 1 complete if we have a project
+            const s1 = document.getElementById('onboardStep1');
+            const c1 = document.getElementById('onboardStep1Check');
+            if (hasProject && s1) {
+                s1.style.opacity = '1'; s1.style.pointerEvents = 'auto';
+                if (c1) c1.style.display = 'block';
+                const b1 = document.getElementById('onboardBtn1');
+                if (b1) { b1.textContent = '✓ Project created'; b1.style.background='#16a34a'; b1.style.pointerEvents='none'; }
+            }
+
+            // Step 2 unlocks once project exists
+            const s2 = document.getElementById('onboardStep2');
+            if (s2) { s2.style.opacity = hasProject?'1':'0.5'; s2.style.pointerEvents = hasProject?'auto':'none'; }
+            const c2 = document.getElementById('onboardStep2Check');
+            if (hasBH && s2) {
+                if (c2) c2.style.display = 'block';
+                const b2 = document.getElementById('onboardBtn2');
+                if (b2) { b2.textContent = '✓ Borehole added'; b2.style.background='#16a34a'; b2.style.pointerEvents='none'; }
+            }
+
+            // Step 3 unlocks once BH exists
+            const s3 = document.getElementById('onboardStep3');
+            if (s3) { s3.style.opacity = hasBH?'1':'0.5'; s3.style.pointerEvents = hasBH?'auto':'none'; }
+
+            // Hide whole tip once dismissed or both done
+            if (hasBH && step >= 2) dismissFirstRunTip();
+        }
+        window._onboardRefresh = _onboardRefresh;
+
         function checkFirstRun() {
             if (localStorage.getItem('_hasSeenWelcome')) return;
             if (boreholes.length === 0 && projects.length === 0) {
