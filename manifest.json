@@ -8,13 +8,59 @@
   "background_color": "#1e3a8a",
   "theme_color": "#1e3a8a",
   "lang": "en",
-  "categories": ["utilities", "productivity", "science"],
+  "categories": [
+    "utilities",
+    "productivity",
+    "science"
+  ],
   "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "icon-512.png",  "sizes": "512x512",  "type": "image/png", "purpose": "any maskable" }
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-192-maskable.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ],
   "shortcuts": [
-    { "name": "New Calculation", "short_name": "Calculator", "url": "./borehole-calculator.html#calculator", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] },
-    { "name": "GW Levels",       "short_name": "GW Levels",  "url": "./borehole-calculator.html#gwlevels",   "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] }
+    {
+      "name": "New Calculation",
+      "short_name": "Calculator",
+      "url": "./borehole-calculator.html#calculator",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "GW Levels",
+      "short_name": "GW Levels",
+      "url": "./borehole-calculator.html#gwlevels",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
   ]
 }

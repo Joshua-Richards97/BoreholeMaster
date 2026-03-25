@@ -14,10 +14,7 @@
     <meta name="apple-mobile-web-app-title" content="BH Master">
     <link rel="manifest" href="manifest.json">
     <script>/* inline manifest */
-    (function(){const m={name:"Borehole Master",short_name:"BH Master",display:"standalone",theme_color:"#1e3a8a",icons:[{src:"icon-192.png",sizes:"192x192",type:"image/png"}]};
-    const b=new Blob([JSON.stringify(m)],{type:"application/json"});
-    document.querySelector('link[rel="manifest"]').href=URL.createObjectURL(b);
-    })();
+    (function(){const m={"name": "Borehole Master", "short_name": "BH Master", "display": "standalone", "background_color": "#1e3a8a", "theme_color": "#1e3a8a", "icons": [{"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"}, {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"}, {"src": "icon-192-maskable.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable"}, {"src": "icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}]};const b=new Blob([JSON.stringify(m)],{type:"application/json"});document.querySelector('link[rel="manifest"]').href=URL.createObjectURL(b);})();
     </script>
     <link rel="apple-touch-icon" href="icon-192.png">
     
