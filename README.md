@@ -3,8 +3,6 @@
 
 A professional single-file progressive web app for hydrogeologists working in the field. Designed for offline-first use on mobile devices, with cloud export and PDF reporting built in.
 
-
-NOTES: data is stored locally on your device; export to PDF/CSV regularly and don't clear your browser cache. Site images use alot of space and are not practical to use all the time
 ---
 
 ## Deployment
