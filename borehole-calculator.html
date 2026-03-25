@@ -12,6 +12,12 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="BH Master">
     <link rel="manifest" href="manifest.json">
+    <script>/* inline manifest */
+    (function(){const m={name:"Borehole Master",short_name:"BH Master",display:"standalone",theme_color:"#1e3a8a",icons:[{src:"icon-192.png",sizes:"192x192",type:"image/png"}]};
+    const b=new Blob([JSON.stringify(m)],{type:"application/json"});
+    document.querySelector('link[rel="manifest"]').href=URL.createObjectURL(b);
+    })();
+    </script>
     <link rel="apple-touch-icon" href="icon-192.png">
     
     <style>
@@ -1844,7 +1850,6 @@
                 <div class="export-actions">
                     <button class="btn btn-green haptic-btn btn-sm" onclick="exportFilteredLogsCSV()">CSV</button>
                     <button class="btn pdf-btn haptic-btn btn-sm" onclick="exportFilteredLogsPDF()">PDFs</button>
-                    <button class="btn btn-ghost haptic-btn btn-sm" onclick="exportFilteredFieldSheets()" style="border-color:var(--navy);color:var(--navy);">Sheets</button>
 
                     <button class="btn btn-red haptic-btn btn-sm" onclick="clearAllCalculatorLogs()">Clear</button>
                 </div>
