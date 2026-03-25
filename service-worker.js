@@ -18,16 +18,21 @@ self.addEventListener('activate', e => {
 });
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
+
+  // Never cache HTML → always fetch latest
+  if (e.request.destination === 'document') {
+    e.respondWith(fetch(e.request));
+    return;
+  }
+
+  // Everything else → cache-first (your current behaviour)
   e.respondWith(
     caches.match(e.request).then(cached => {
-      if (cached) return cached;
-      return fetch(e.request).then(response => {
-        if (response && response.status === 200) {
-          const clone = response.clone();
-          caches.open(CACHE_VERSION).then(cache => cache.put(e.request, clone));
-        }
-        return response;
-      }).catch(() => cached);
+      return cached || fetch(e.request).then(res => {
+        const clone = res.clone();
+        caches.open(CACHE_VERSION).then(cache => cache.put(e.request, clone));
+        return res;
+      });
     })
   );
 });
