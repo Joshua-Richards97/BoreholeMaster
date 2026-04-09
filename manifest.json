@@ -1,52 +1,19 @@
 {
   "name": "Borehole Master",
   "short_name": "BH Master",
-  "description": "Field hydrogeological calculator for borehole volumes, groundwater levels and recovery tracking.",
+  "description": "Professional field calculator for hydrogeologists — purge volumes, recovery tests, GW levels, chemistry sampling, and PDF/CSV export.",
   "start_url": "./borehole-calculator.html",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#16305a",
-  "theme_color": "#16305a",
-  "lang": "en",
-  "categories": [
-    "utilities",
-    "productivity",
-    "science"
-  ],
+  "background_color": "#1e3a8a",
+  "theme_color": "#1e3a8a",
+  "categories": ["utilities", "productivity"],
   "icons": [
     {
-      "src": "icon-192-maskable.png",
+      "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAIAAADdvvtQAAAABmJLR0QA/wD/AP+gvaeTAAAgAElEQVR4nO29",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
-    },
-    {
-      "src": "icon-512-maskable.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "Purge Calculator",
-      "url": "./borehole-calculator.html#calculator",
-      "icons": [
-        {
-          "src": "icon-192-maskable.png",
-          "sizes": "192x192"
-        }
-      ]
-    },
-    {
-      "name": "GW Levels",
-      "url": "./borehole-calculator.html#gwlevels",
-      "icons": [
-        {
-          "src": "icon-192-maskable.png",
-          "sizes": "192x192"
-        }
-      ]
     }
   ]
 }
